@@ -1,0 +1,231 @@
+/* Mobile menu overlay -> prototype .mobile-nav sheet (brightpath-html main.css
+   987-1066): brand head + bordered close, left-aligned 56px rows with a hairline,
+   collapsible submenus with a chevron, and the two CTA buttons at the foot.
+   Elements added by assets/js/mobile-nav.js. */
+
+.bp-mobile-nav.is-menu-open {
+	padding: 0 !important;
+	background-color: var(--wp--preset--color--sand-50) !important;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+
+.bp-mobile-nav.is-menu-open .wp-block-navigation__responsive-close,
+.bp-mobile-nav.is-menu-open .wp-block-navigation__responsive-dialog {
+	max-width: none;
+	width: 100%;
+	margin: 0;
+}
+
+.bp-mobile-nav.is-menu-open .wp-block-navigation__responsive-dialog {
+	margin-top: 0 !important;
+	padding: 0;
+}
+
+/* Head */
+.bp-mobile-nav__head {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	min-height: 69px;
+	padding: 0 20px;
+	background-color: var(--wp--preset--color--sand-50);
+	border-bottom: 1px solid var(--wp--preset--color--sand-200);
+}
+.bp-mobile-nav__head .bp-brand { display: flex; align-items: center; gap: 12px; }
+
+.bp-mobile-nav.is-menu-open .wp-block-navigation__responsive-container-close {
+	position: fixed;
+	top: 10px;
+	right: 20px;
+	z-index: 2;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 48px;
+	height: 48px;
+	border: 1.5px solid var(--wp--preset--color--sand-200);
+	border-radius: 8px;
+	background-color: var(--wp--preset--color--white);
+	color: var(--wp--preset--color--ink-900);
+}
+.bp-mobile-nav.is-menu-open .wp-block-navigation__responsive-container-close:hover {
+	background-color: var(--wp--preset--color--forest-100);
+	border-color: var(--wp--preset--color--forest-700);
+}
+.bp-mobile-nav.is-menu-open .wp-block-navigation__responsive-container-close svg { width: 22px; height: 22px; }
+
+/* Body */
+.bp-mobile-nav.is-menu-open .wp-block-navigation__responsive-container-content {
+	display: flex !important;
+	flex-direction: column;
+	align-items: stretch !important;
+	padding: 20px 18px 32px !important;
+}
+
+.bp-mobile-nav.is-menu-open .wp-block-navigation__container {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch !important;
+	gap: 8px !important;
+	width: 100%;
+}
+
+.bp-mobile-nav.is-menu-open .wp-block-navigation__container > .wp-block-navigation-item {
+	display: block;
+	width: 100%;
+}
+
+.bp-mobile-nav.is-menu-open .wp-block-navigation__container > .wp-block-navigation-item > .wp-block-navigation-item__content,
+.bp-mobile-nav__toggle {
+	display: flex !important;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 56px;
+	padding: 12px 16px !important;
+	font-family: inherit;
+	font-size: 1.125rem !important;
+	font-weight: 600 !important;
+	line-height: 1.3;
+	color: var(--wp--preset--color--ink-900) !important;
+	text-align: left;
+	text-decoration: none;
+	background: none;
+	border: 0;
+	border-bottom: 1px solid var(--wp--preset--color--sand-200);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background-color 150ms ease;
+}
+
+.bp-mobile-nav.is-menu-open .wp-block-navigation__container > .wp-block-navigation-item > .wp-block-navigation-item__content:hover,
+.bp-mobile-nav__toggle:hover,
+.bp-mobile-nav__toggle[aria-expanded="true"] {
+	background-color: var(--wp--preset--color--forest-100);
+}
+
+.bp-mobile-nav.is-menu-open .wp-block-navigation__container > .current-menu-item > .wp-block-navigation-item__content {
+	color: var(--wp--preset--color--forest-700) !important;
+	background-color: var(--wp--preset--color--forest-100);
+}
+/* No desktop underline on the current item inside the sheet. */
+.bp-mobile-nav.is-menu-open .wp-block-navigation-item__content::after { display: none !important; }
+
+.bp-mobile-nav__toggle svg {
+	flex: none;
+	width: 20px;
+	height: 20px;
+	color: var(--wp--preset--color--sage-600);
+	transition: transform 200ms ease;
+}
+.bp-mobile-nav__toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+/* A parent with a submenu shows the toggle row, not its own link or core's icon. */
+.bp-mobile-nav.is-menu-open .wp-block-navigation__container > .wp-block-navigation-item.has-child > .wp-block-navigation-item__content,
+.bp-mobile-nav.is-menu-open .wp-block-navigation__container > .wp-block-navigation-item.has-child > .wp-block-navigation__submenu-icon { display: none !important; }
+
+/* Submenus: collapsed until toggled, indented with a left rule. */
+.bp-mobile-nav.is-menu-open .has-child > .wp-block-navigation__submenu-container {
+	display: none !important;
+}
+.bp-mobile-nav.is-menu-open .has-child.bp-sub-open > .wp-block-navigation__submenu-container {
+	position: static !important;
+	display: flex !important;
+	flex-direction: column;
+	gap: 0 !important;
+	width: auto !important;
+	min-width: 0 !important;
+	height: auto !important;
+	margin: 4px 0 0 16px !important;
+	padding: 0 !important;
+	opacity: 1 !important;
+	visibility: visible !important;
+	background: none !important;
+	border: 0 !important;
+	box-shadow: none !important;
+	transform: none !important;
+}
+
+.bp-mobile-nav.is-menu-open .wp-block-navigation__submenu-container .wp-block-navigation-item { display: block; width: 100%; }
+
+.bp-mobile-nav.is-menu-open .wp-block-navigation__submenu-container .wp-block-navigation-item__content {
+	display: flex !important;
+	flex-direction: column;
+	align-items: flex-start;
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 48px;
+	justify-content: center;
+	padding: 8px 16px !important;
+	font-size: 1rem !important;
+	font-weight: 400 !important;
+	color: var(--wp--preset--color--ink-700) !important;
+	text-align: left;
+	border-left: 2px solid var(--wp--preset--color--sand-200);
+	border-radius: 0;
+	background: none;
+}
+.bp-mobile-nav.is-menu-open .wp-block-navigation__submenu-container .wp-block-navigation-item__content:hover {
+	color: var(--wp--preset--color--forest-700) !important;
+	border-left-color: var(--wp--preset--color--terracotta-500);
+	background-color: var(--wp--preset--color--sand-100);
+}
+/* Panel descriptions and icons belong to the desktop mega menu only. */
+.bp-mobile-nav.is-menu-open .wp-block-navigation__submenu-container .wp-block-navigation-item__description,
+.bp-mobile-nav.is-menu-open .wp-block-navigation__submenu-container .wp-block-navigation-item::before,
+.bp-mobile-nav.is-menu-open .wp-block-navigation__submenu-container .wp-block-navigation-item__content::before { display: none !important; }
+
+/* Foot */
+.bp-mobile-nav__foot {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	width: 100%;
+	margin-top: 32px;
+}
+.bp-mobile-nav__btn {
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	width: 100%;
+	min-height: 48px;
+	padding: 12px 20px;
+	font-size: 1rem;
+	font-weight: 600;
+	text-decoration: none;
+	border-radius: 8px;
+	transition: background-color 150ms ease, border-color 150ms ease;
+}
+.bp-mobile-nav__btn svg { width: 20px; height: 20px; }
+.bp-mobile-nav__btn--accent {
+	color: var(--wp--preset--color--white) !important;
+	background-color: var(--wp--preset--color--terracotta-600);
+}
+.bp-mobile-nav__btn--accent:hover { background-color: var(--wp--preset--color--terracotta-700); }
+.bp-mobile-nav__btn--outline {
+	color: var(--wp--preset--color--forest-700) !important;
+	background-color: transparent;
+	border: 1.5px solid var(--wp--preset--color--sand-200);
+}
+.bp-mobile-nav__btn--outline:hover {
+	background-color: var(--wp--preset--color--forest-100);
+	border-color: var(--wp--preset--color--forest-700);
+}
+
+/* "All services" is the desktop panel foot; the prototype sheet lists it first. */
+.brightpath-header .bp-mobile-nav.is-menu-open .wp-block-navigation__submenu-container > .bp-nav-panel-foot {
+	display: block !important;
+	order: -1;
+}
+
+/* The added pieces exist in the DOM at every width; only the open sheet shows them. */
+.bp-mobile-nav:not(.is-menu-open) :is(.bp-mobile-nav__head, .bp-mobile-nav__toggle, .bp-mobile-nav__foot) {
+	display: none !important;
+}

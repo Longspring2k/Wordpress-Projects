@@ -1,0 +1,2478 @@
+/* ==========================================================================
+   Bright Path — band layer
+
+   OWNER: the band track. Reveal, split geometry, grid rungs, steps rail, band decoration, dark surfaces, titles, interaction states, panel geometry.
+
+   One shard of what used to be a single style.css. The split exists so that
+   parallel work cannot collide: `.design-core/` is not under version control,
+   so two agents editing one file means one of them is lost, not merged.
+   Do not move rules between shards without saying so.
+   ========================================================================== */
+/* ==========================================================================
+   Sections 6-11 -- the pattern layer.
+
+   Sections 1-5 above are measured and frozen. Everything below exists because
+   a pattern shipped in theme/patterns/ renders an element that needs it AND
+   no theme.json preset or core block support already expresses it. A selector
+   with no pattern consumer does not belong here; the prototype's 63 orphan
+   class names, its tabs/toast/modal code, its :root token block, its --rgb-*
+   triplets, [data-demo-state] and @media print are all deliberately absent.
+
+   Contents
+     6   Reveal
+     7   Split geometry
+     8   Grid rungs
+     9   Steps rail
+    10   Band decoration
+    11   Head split
+
+   One convention used throughout 7-9. Core's layout support prints
+   `gap` and core's own block stylesheet prints `flex-basis`/`flex-wrap` at
+   specificity (0,1,0) or (0,2,0), from a stylesheet whose position relative to
+   this one is not guaranteed. Where this file must win, the class is repeated
+   (`.bp-grid-3.bp-grid-3`) to raise specificity rather than relying on source
+   order. Where core uses !important -- core/media-text's inline
+   grid-template-columns, and .wp-block-columns' flex-wrap -- !important is the
+   only answer and is marked at each site.
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   6  Reveal
+
+   Ported from main.css 1582-1592 (the .js [data-reveal] block) and 1732 (the
+   reduced-motion override), with the selector rewritten: no core block emits
+   an arbitrary data-* attribute, so the built site's hook is .bp-reveal.
+   BUILD-CONTRACT.md 10. Anything measuring motion here selects .bp-reveal;
+   [data-reveal] matches zero elements on this site.
+
+   Scoped to .bp-js, which functions.php prints inline in <head> before first
+   paint. With JavaScript off the class never lands, none of these rules match,
+   and every band is simply visible. The editor canvas never runs wp_head, so
+   .bp-js is absent there and pattern content is visible in the editor by
+   construction.
+   -------------------------------------------------------------------------- */
+
+.bp-js .bp-reveal {
+	opacity: 0;
+	transform: translateY(16px);
+	transition:
+		opacity 520ms cubic-bezier(0.22, 0.61, 0.36, 1),
+		transform 520ms cubic-bezier(0.22, 0.61, 0.36, 1);
+	will-change: opacity, transform;
+}
+
+.bp-js .bp-reveal.is-revealed {
+	opacity: 1;
+	transform: none;
+	will-change: auto;
+}
+
+.bp-js .bp-reveal--d1 { transition-delay: 70ms; }
+.bp-js .bp-reveal--d2 { transition-delay: 140ms; }
+.bp-js .bp-reveal--d3 { transition-delay: 210ms; }
+.bp-js .bp-reveal--d4 { transition-delay: 280ms; }
+
+@media (prefers-reduced-motion: reduce) {
+	.bp-js .bp-reveal {
+		opacity: 1 !important;
+		transform: none !important;
+		transition: none !important;
+	}
+}
+
+
+/* --------------------------------------------------------------------------
+   7  Split geometry
+
+   Two shapes. core/media-text carries the 20+ instance `split-media-text`
+   band; core/columns carries the hero and CTA splits, which need a media
+   query core does not offer.
+
+   Runtime facts, observed and not to be re-derived (BUILD-CONTRACT.md 1):
+     - core/media-text writes grid-template-columns as an INLINE style, so the
+       override below must be !important.
+     - core/media-text stacks at 600px in its own stylesheet; this design
+       stacks at 900.
+     - core/media-text has NO blockGap support, so the gap is CSS and is not an
+       editor control. Value from main.css:441.
+     - core/columns stacks at 782px and forces flex-basis:100% !important below
+       it; this design stacks at 900, so 782-899 needs !important back.
+
+   core/media-text also pads its content column by 8% on both sides. Left in
+   place that padding reads as part of the gap and the measured gutter between
+   media and text is wrong at every width, so it is zeroed here and the gap is
+   the only thing between the two columns.
+   -------------------------------------------------------------------------- */
+
+.wp-block-media-text.bp-split {
+	grid-template-columns: minmax(0, 1fr) !important;
+	gap: clamp(2rem, 5vw, 4.5rem);
+	align-items: center;
+}
+
+.wp-block-media-text.bp-split > .wp-block-media-text__content {
+	padding: 0;
+}
+
+/* A2. Below 900 the single-track grid is not enough on its own. Core keeps
+   `.wp-block-media-text__content{grid-column:2;grid-row:1}` at (0,2,0) in ALL
+   viewports, and a child placed in column 2 of a one-track grid creates an
+   IMPLICIT second track -- so the explicit media track collapsed to 0px and
+   the image vanished between 601 and 899. Core's own is-stacked-on-mobile
+   rules only reach 600px, which is why 390 and 599 were correct.
+   Both children are therefore pinned to column 1 and given their own row.
+   Measured 0.00px media track at 767 and 899 before this rule. */
+@media (max-width: 899px) {
+	.wp-block-media-text.bp-split {
+		grid-template-rows: auto auto;
+	}
+
+	.wp-block-media-text.bp-split > .wp-block-media-text__media {
+		grid-column: 1;
+		grid-row: 1;
+	}
+
+	.wp-block-media-text.bp-split > .wp-block-media-text__content {
+		grid-column: 1;
+		grid-row: 2;
+	}
+
+	/* mediaPosition:right raises core's own selectors to (0,3,0); match it. */
+	.wp-block-media-text.bp-split.has-media-on-the-right > .wp-block-media-text__media {
+		grid-column: 1;
+		grid-row: 1;
+	}
+
+	.wp-block-media-text.bp-split.has-media-on-the-right > .wp-block-media-text__content {
+		grid-column: 1;
+		grid-row: 2;
+	}
+}
+
+/* RETAINED, NOT LIVE. After the media-slot change no pattern composes
+   core/media-text any more -- split-media-text is core/columns, because a
+   media-text figure cannot hold the label block or the panel the design puts
+   there (measured: the editor draws them in the CONTENT column and the first
+   save relocates them). Every .bp-split rule below therefore has no PATTERN
+   consumer.
+
+   They stay until the page track rebuilds, and not one day longer: the live
+   /about/ and /services/daily-living/ still store the old media-text markup,
+   and deleting these rules today would break both bands the moment the CSS
+   deployed. Delete this whole block once no document composes core/media-text
+   -- it is the one exception to section 6's no-orphan-selector rule, and it is
+   an exception with an end date, not a permanent one.
+
+   A2b. The ratio is POSITIONAL, not media-relative -- measured, main.css:1674.
+   28 of the 29 container splits in the prototype are `.split--wide`
+   (1.15fr / 0.85fr); only index.html and sil-property.html carry the plain
+   1.05/0.95 rung, and neither is a band this pattern builds. The earlier rule
+   here used the plain rung AND swapped the tracks for mediaPosition:right, so
+   the wide side followed the media instead of staying in column one. The
+   prototype's `.split--reverse` moves the media with `order:-1` and never
+   touches the tracks: column one is 1.15fr whatever sits in it.
+   Measured before: 579.594 / 524.391. Prototype: 634.797 / 469.203.
+
+   Why CSS and not the `mediaWidth` attribute: mediaWidth is one percentage of
+   the whole grid, so it cannot subtract the 72px gap and it is only correct at
+   one container width; and it describes the MEDIA column, so a flipped
+   instance would need the complementary number -- two owners for one ratio.
+   The fr pair holds at every width and in both orientations. core/media-text
+   writes grid-template-columns inline (contract 1), hence !important. */
+@media (min-width: 900px) {
+	.wp-block-media-text.bp-split,
+	.wp-block-media-text.bp-split.has-media-on-the-right {
+		grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr) !important;
+	}
+}
+
+/* --- the core/columns splits ------------------------------------------- */
+
+.wp-block-columns.bp-split-cols {
+	--bp-split-gap: clamp(2rem, 5vw, 4.5rem);
+}
+
+.wp-block-columns.bp-split-cols.bp-split-cols {
+	gap: var(--bp-split-gap);
+	align-items: center;
+}
+
+@media (max-width: 899px) {
+	/* A4. Two core declarations had to be beaten here, not one.
+	   1. `@media(min-width:782px){.wp-block-columns{flex-wrap:nowrap!important}}`
+	      -- without wrap restored, a 100% basis cannot break the row and the
+	      columns simply shrink side by side. Measured: flipped at 782, not 900.
+	   2. `.wp-block-columns:not(.is-not-stacked-on-mobile)>.wp-block-column
+	      {flex-basis:100%!important}` is (0,3,0); the old selector here was
+	      (0,3,0) too and won only below 782 by source order. Now (0,4,0). */
+	.wp-block-columns.bp-split-cols.bp-split-cols {
+		flex-wrap: wrap !important;
+	}
+
+	.wp-block-columns.bp-split-cols.bp-split-cols > .wp-block-column {
+		flex-basis: 100% !important;
+		flex-grow: 0;
+	}
+}
+
+@media (min-width: 900px) {
+	/* A percentage flex-basis ignores the gap, so the gap comes out of 100%
+	   first and the ratio is applied to what is left. This is the footer
+	   lesson from the foundation, not a preference. */
+	.bp-split-cols > .wp-block-column {
+		flex-basis: calc((100% - var(--bp-split-gap)) * 0.5);
+		flex-grow: 0;
+	}
+
+	.bp-split-cols--lead > .wp-block-column:first-child {
+		flex-basis: calc((100% - var(--bp-split-gap)) * 0.575);
+	}
+
+	.bp-split-cols--lead > .wp-block-column:last-child {
+		flex-basis: calc((100% - var(--bp-split-gap)) * 0.425);
+	}
+
+	/* pages.css:539 -- the home hero, 1.02/0.98. Approved rung.
+
+	   CORRECTION to what I reported: this band is NOT on a third container
+	   measure. I read `.hero__grid` at 1240 and called it a wider container;
+	   1240 is its PADDED box and 32px of that is padding on each side, so the
+	   content measure is 1176, exactly like every other band. Two numbers
+	   differ from the plain split, not three: the gap (64, not 72) and the
+	   ratio. Measured: 567.109 / 544.891 of 1112, which is 1.02 / 0.98. */
+	.bp-split-cols--hero > .wp-block-column:first-child {
+		flex-basis: calc((100% - var(--bp-split-gap)) * 0.51);
+	}
+
+	.bp-split-cols--hero > .wp-block-column:last-child {
+		flex-basis: calc((100% - var(--bp-split-gap)) * 0.49);
+	}
+
+	/* main.css:1673 -- the plain `.split` rung, 1.05/0.95, which `.bp-split`
+	   used to be before D3 moved the default to `--wide`. Two compositions
+	   want it back: index.html's one reverse split and sil-property.html's
+	   bare one. A per-instance class the composer sets, not a pattern default:
+	   28 of the prototype's 29 container splits are the wide rung.
+	   Measured target: 579.594 / 524.391 of 1104. */
+	.bp-split-cols--even > .wp-block-column:first-child {
+		flex-basis: calc((100% - var(--bp-split-gap)) * 0.525);
+	}
+
+	.bp-split-cols--even > .wp-block-column:last-child {
+		flex-basis: calc((100% - var(--bp-split-gap)) * 0.475);
+	}
+}
+
+/* The hero's gap is FLUID, and 64px is only its cap. Set on the variable the
+   whole ladder already reads, so the basis maths above subtracts the right
+   number without a second declaration of it.
+
+   64px flat was wrong, and wrong in a way that hid itself: it is correct from
+   1280 up, which includes 1440, and the other gated width is 390 where the
+   band has stacked and has no gap at all. So both gates passed while the band
+   was 2-9px out at every width in between. Measured, prototype against the
+   flat 64:
+
+     900   45 vs 64     1100   55 vs 64     1240   62 vs 64
+     1024  51.2 vs 64   1200   60 vs 64     1440   64 vs 64
+
+   That is 5% of the viewport capped at 4rem. The ratio rung was right all
+   along; it was dividing a narrower track than the prototype was.
+
+   A drift of 2-9px is exactly the size that reads as sub-pixel rounding and is
+   not one. Gate at the rungs; sweep when a number is off by less than a rung.
+
+   The block class is repeated for (0,2,0): the base declaration is
+   `.wp-block-columns.bp-split-cols`, not `.bp-split-cols`, so a single-class
+   override loses and does so SILENTLY. The resolved custom property said
+   `clamp(2rem, 5vw, 4.5rem)` where the file said 64px; reading the resolved
+   value rather than the file is what found it. */
+.wp-block-columns.bp-split-cols--hero {
+	--bp-split-gap: clamp(2rem, 5vw, 4rem);
+}
+
+
+/* --------------------------------------------------------------------------
+   8  Grid rungs
+
+   core/columns is one flex row that never wraps: core sets
+   flex-wrap:nowrap !important at >=782 and on .is-not-stacked-on-mobile.
+   These bands are grids of 3, 4, 6 or 8 cards, so wrapping is restored here
+   with the only tool core leaves -- !important, at a raised specificity.
+
+   Widths are flex-basis percentages, never fr: core/columns has no fr concept.
+   Every basis subtracts the gaps before dividing, because a percentage basis
+   ignores the gap and the row overflows by exactly the gap total.
+
+   Gap totals below are the resolved px of the blockGap preset each pattern
+   sets on its columns block:
+     bp-grid-2   32px column / 24px row (spacing|60 / spacing|50), 48px column
+                 at >=900 per pages.css:544
+     bp-grid-3   24px (spacing|50)
+     bp-grid-4   24px (spacing|50)
+
+   Rungs, from main.css 1671-1710 and pages.css 528-544:
+     <=640   one column, every grid
+     641-899 two columns
+     >=900   bp-grid-3 three; bp-grid-4 still three
+     >=1200  bp-grid-4 four
+   bp-grid-4--early is the trust-strip ladder: 2 -> 4 at 900, with no 3-up
+   rung, because that band's four items are structural and 3+1 is ragged.
+   -------------------------------------------------------------------------- */
+
+.wp-block-columns.bp-grid-2.bp-grid-2,
+.wp-block-columns.bp-grid-3.bp-grid-3,
+.wp-block-columns.bp-grid-4.bp-grid-4 {
+	flex-wrap: wrap !important;
+	align-items: stretch;
+}
+
+.bp-grid-2 > .wp-block-column,
+.bp-grid-3 > .wp-block-column,
+.bp-grid-4 > .wp-block-column {
+	flex-grow: 0;
+	flex-basis: 100%;
+}
+
+/* A3. Every basis below is written with the block class repeated AND the
+   core class present -- (0,4,0) -- because core ships
+   `@media(max-width:781px){.wp-block-columns:not(.is-not-stacked-on-mobile)
+   > .wp-block-column{flex-basis:100%!important}}` at (0,3,0). Two !important
+   declarations are decided by specificity, so the old (0,2,0)/(0,3,0)
+   selectors lost the whole 641-781 range: every grid measured one column at
+   641 and at 781 and flipped at 782, which is core's breakpoint and not this
+   design's. Contract 3: 1-col below 641, 2-col from 641. */
+@media (min-width: 641px) {
+	.wp-block-columns.bp-grid-2.bp-grid-2 > .wp-block-column {
+		flex-basis: calc((100% - 32px) / 2) !important;
+	}
+
+	.wp-block-columns.bp-grid-3.bp-grid-3 > .wp-block-column,
+	.wp-block-columns.bp-grid-4.bp-grid-4 > .wp-block-column {
+		flex-basis: calc((100% - 24px) / 2) !important;
+	}
+}
+
+@media (min-width: 900px) {
+	.bp-grid-2.bp-grid-2 {
+		column-gap: 48px;
+		row-gap: 32px;
+	}
+
+	.wp-block-columns.bp-grid-2.bp-grid-2 > .wp-block-column {
+		flex-basis: calc((100% - 48px) / 2) !important;
+	}
+
+	.wp-block-columns.bp-grid-3.bp-grid-3 > .wp-block-column {
+		flex-basis: calc((100% - 48px) / 3) !important;
+	}
+
+	.wp-block-columns.bp-grid-4.bp-grid-4 > .wp-block-column {
+		flex-basis: calc((100% - 48px) / 3) !important;
+	}
+
+	.wp-block-columns.bp-grid-4--early.bp-grid-4--early > .wp-block-column {
+		flex-basis: calc((100% - 72px) / 4) !important;
+	}
+}
+
+/* D2. The statement-card pair is `.grid grid--2 grid--gap-lg` (main.css:431
+   plus the gap-lg modifier): ONE 32px gutter at every width. bp-grid-2 is the
+   benefit grid, which opens to 48px at 900 (pages.css:544) -- a different
+   component that happens to also be two columns. The modifier pins the wider
+   rung back rather than forking the whole ladder.
+   Measured before (about, 1440): 564px columns, on the 48px rung.
+   Prototype: 572px. Selector is (0,5,0) against the 48px rule's (0,4,0). */
+@media (min-width: 900px) {
+	.wp-block-columns.bp-grid-2.bp-grid-2--flat {
+		column-gap: var(--wp--preset--spacing--60);
+	}
+
+	.wp-block-columns.bp-grid-2.bp-grid-2--flat.bp-grid-2--flat > .wp-block-column {
+		flex-basis: calc((100% - 32px) / 2) !important;
+	}
+}
+
+/* The prototype's .card is a direct grid child, so the pair is one row and
+   both cards take the taller height (measured 323.719px each, not 290.8 and
+   319.7). core/columns puts a column between the row and the panel, and a
+   column that stretches does not pass its height on. Measured before this
+   rule: 290.828 / 319.719 -- two different-height cards in one row. */
+.bp-grid-2--flat > .wp-block-column > .bp-panel {
+	height: 100%;
+}
+
+@media (min-width: 1200px) {
+	.wp-block-columns.bp-grid-4.bp-grid-4 > .wp-block-column {
+		flex-basis: calc((100% - 72px) / 4) !important;
+	}
+}
+
+
+/* --------------------------------------------------------------------------
+   9  Steps rail
+
+   The rule connecting the step markers has no core block. It is a pseudo
+   element on the marker, sized to the remainder of the track.
+
+   THE FOUR-MARKER ASSUMPTION. steps-row is four columns and steps-stack is
+   five items, and the connector is drawn on every marker except the last
+   (:not(:last-child)). A fifth column in steps-row re-flows the track and the
+   rule no longer reaches the next marker. That is why both patterns ship
+   templateLock:"all" -- the lock is what enforces the count this rule assumes,
+   and neither can be relaxed without rewriting this block.
+   -------------------------------------------------------------------------- */
+
+.wp-block-columns.bp-steps-row.bp-steps-row {
+	flex-wrap: wrap !important;
+	align-items: flex-start;
+}
+
+.bp-steps-row > .wp-block-column {
+	flex-grow: 0;
+	flex-basis: 100%;
+}
+
+.bp-steps-row .bp-step-marker {
+	position: relative;
+	display: flex;
+	align-items: center;
+	width: 100%;
+}
+
+@media (min-width: 641px) {
+	/* Contract 3: two up from 641. Same (0,4,0) requirement as section 8. */
+	.wp-block-columns.bp-steps-row.bp-steps-row > .wp-block-column {
+		flex-basis: calc((100% - 32px) / 2) !important;
+	}
+}
+
+@media (min-width: 900px) {
+	.wp-block-columns.bp-steps-row.bp-steps-row > .wp-block-column {
+		/* blockGap spacing|60 = 2rem = 32px, three gaps across four columns. */
+		flex-basis: calc((100% - 96px) / 4) !important;
+	}
+
+	.bp-steps-row > .wp-block-column:not(:last-child) .bp-step-marker::after {
+		content: "";
+		flex: 1 1 auto;
+		height: 2px;
+		margin-left: 0.75rem;
+		background: linear-gradient(
+			to right,
+			var(--wp--preset--color--sage-300),
+			var(--wp--preset--color--sand-200)
+		);
+	}
+}
+
+/* The stacked form: the rail runs down the left of the markers.
+   It hangs off the whole step (not the 48px marker) so it always reaches the
+   next marker, however many lines the step text wraps to. 8px clear of each
+   circle; the 40px step gap is spacing|70. */
+.bp-steps-stack .bp-step-marker {
+	display: flex;
+	align-items: center;
+}
+
+.bp-steps-stack > .wp-block-group:not(:last-child) {
+	position: relative;
+}
+
+.bp-steps-stack > .wp-block-group:not(:last-child) > .bp-step-marker::after {
+	content: "";
+	position: absolute;
+	top: calc(48px + 8px);
+	bottom: calc(var(--wp--preset--spacing--70) * -1 + 8px);
+	left: 24px;
+	width: 2px;
+	transform: translateX(-50%);
+	background: linear-gradient(
+		to bottom,
+		var(--wp--preset--color--sage-300),
+		var(--wp--preset--color--sand-200)
+	);
+}
+
+
+/* --------------------------------------------------------------------------
+  10  Band decoration
+
+   Solid colours resolve through a palette preset custom property, exactly as
+   the theme.json aliases do. color-mix() is used only where the prototype
+   painted with alpha -- the --rgb-* call-sites -- since no theme.json slot
+   accepts a bare channel triplet.
+   -------------------------------------------------------------------------- */
+
+/* Eyebrow. The whole rule lives here, not in the pattern: uppercase, tracking
+   and the 22px bar are not expressible as presets, and putting them in a
+   pattern would mean a literal in every one of the fourteen that use it. */
+.bp-eyebrow {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-weight: 600;
+	letter-spacing: 0.09em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--sage-600);
+}
+
+.bp-eyebrow::before {
+	content: "";
+	flex: 0 0 auto;
+	width: 22px;
+	height: 2px;
+	border-radius: 2px;
+	background-color: var(--wp--preset--color--terracotta-600);
+}
+
+/* Tick list. main.css 833-849. The tick is a background image, not a block. */
+.tick-list {
+	list-style: none;
+	padding-left: 0;
+}
+
+.tick-list li {
+	position: relative;
+	padding-left: var(--wp--preset--spacing--70);
+	line-height: 1.6;
+}
+
+.tick-list li + li {
+	margin-top: var(--wp--preset--spacing--30);
+}
+
+.tick-list li::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0.15em;
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	background-color: var(--wp--preset--color--sage-100);
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234A7355' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+	background-size: 13px;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+/* Icon tile. main.css 707-724. Here it carries the step numbers and the
+   tick glyphs.
+
+   D5. `line-height: 1` was invented here: the prototype declares no
+   line-height on .icon-tile at all, so the glyph inherits the body 1.7 and
+   resolves to 28.9px at the 17px tile size. The tile is a centred inline-flex
+   box with a fixed height, so leading changes nothing about the geometry --
+   but it is a number this layer had no reason to own, and it read as a defect
+   against the prototype. Removed; the tile inherits, as the prototype does.
+   Measured before: 17px. Prototype: 28.9px. */
+.icon-tile {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 48px;
+	height: 48px;
+	border-radius: var(--wp--custom--radius--md);
+	background-color: var(--wp--preset--color--forest-100);
+	color: var(--wp--preset--color--forest-700);
+	font-weight: 600;
+}
+
+/* main.css:721-722. The two tinted tiles, each with its own text colour so
+   the glyph keeps its contrast on the tint. Consumed by card-panel-2. */
+.icon-tile--accent {
+	background-color: var(--wp--preset--color--terracotta-100);
+	color: var(--wp--preset--color--terracotta-700);
+}
+
+.icon-tile--sage {
+	background-color: var(--wp--preset--color--sage-100);
+	color: var(--wp--preset--color--sage-600);
+}
+
+/* pages.css:205 -- the benefit tile. NOT an icon-tile.
+
+   D5, corrected. The class I was given, .icon-tile--sm, is 40x40 radius 6px in
+   forest (main.css:725) and does exist in the prototype 386 times -- but not in
+   this band. The element that actually renders in a benefit row is
+   `.benefit__icon`: 40x40, radius 10px, sage-100 on sage-600. A visitor sees
+   the band, not the class name, so the rendered counterpart wins.
+
+   .icon-tile--sm is gone rather than left behind: after this change it had no
+   pattern consumer, and a selector with no consumer is the thing section 6
+   exists to keep out. If a band later needs the real 6px forest rung it comes
+   back with the pattern that needs it.
+   Measured before: 48x48, radius 10px, forest-100/forest-700, line-height 17px.
+   Prototype: 40x40, radius 10px, sage-100/sage-600, line-height 28.9px. */
+.benefit__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 40px;
+	height: 40px;
+	border-radius: var(--wp--custom--radius--md);
+	background-color: var(--wp--preset--color--sage-100);
+	color: var(--wp--preset--color--sage-600);
+	font-weight: 600;
+}
+
+.icon-tile--round {
+	border-radius: 50%;
+}
+
+/* Stat. main.css 818-821. The size is the `stat` fontSize preset, set on the
+   block; only family, tracking and leading are component-local. */
+.stat__value {
+	font-family: var(--wp--preset--font-family--fraunces);
+	font-weight: 600;
+	line-height: 1;
+	letter-spacing: -0.02em;
+	color: var(--wp--custom--color--text);
+}
+
+.stat__label {
+	color: var(--wp--custom--color--text-muted);
+}
+
+/* Panel. The card and CTA surface. Background comes from the block's own
+   backgroundColor preset -- core prints that with !important, so this rule
+   must not set one. */
+.bp-panel {
+	position: relative;
+	border: 1px solid var(--wp--custom--color--border);
+	border-radius: var(--wp--custom--radius--lg);
+}
+
+.bp-panel:has(> .cta__shape) {
+	overflow: hidden;
+}
+
+/* The base .cta__shape, owed by this plan: main.css:1565, sage 0.55 over
+   terracotta 0.22, both written as --rgb-* triplets the theme does not carry.
+   The soft variant at main.css:1571 is already in section 5. */
+.cta__shape {
+	position: absolute;
+	right: -6%;
+	top: -30%;
+	width: 26rem;
+	height: 26rem;
+	border-radius: 46% 54% 58% 42% / 52% 44% 56% 48%;
+	background: radial-gradient(
+		circle at 30% 30%,
+		color-mix(in srgb, var(--wp--preset--color--sage-600) 55%, transparent),
+		color-mix(in srgb, var(--wp--preset--color--terracotta-600) 22%, transparent)
+	);
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+
+/* --------------------------------------------------------------------------
+  11  Head split -- a breakpoint, not a wrap
+
+   `section-head-split` used core's flex layout with flexWrap:"wrap" and let
+   the browser decide when to stack. Flex wrap triggers on available width, so
+   the band flipped NON-MONOTONICALLY: two columns at 897, back to one at 900,
+   two again at 913. The cause is the gutter step at 900 (24 -> 32px, contract
+   2) shrinking the content box below the fit at exactly the system's biggest
+   rung -- so at 900 it rendered the opposite of the design.
+
+   The band now carries flexWrap:"nowrap" and declares its own direction at
+   the design's rung. Core's layout support prints flex-direction,
+   justify-content and align-items on a generated .wp-container-* class at
+   (0,1,0); the class is repeated here to take (0,3,0) and win regardless of
+   which stylesheet loads last.
+   -------------------------------------------------------------------------- */
+
+.wp-block-group.bp-head-split.bp-head-split {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	align-items: flex-start;
+	justify-content: flex-start;
+}
+
+@media (min-width: 900px) {
+	.wp-block-group.bp-head-split.bp-head-split {
+		flex-direction: row;
+		align-items: flex-end;
+		justify-content: space-between;
+	}
+
+	/* The text column takes the slack; the link never shrinks or wraps. */
+	.bp-head-split.bp-head-split > :first-child {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+
+	.bp-head-split.bp-head-split > :last-child {
+		flex: 0 0 auto;
+	}
+}
+
+
+/* ==========================================================================
+  12  Design-QA round 2 -- the thirteen defects
+
+   Everything below was written against a measured difference between the
+   prototype and the built page, not against a reading of the design. Each
+   block names the prototype rule it reproduces so the next reader can check
+   the claim rather than trust it.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+  12.1  Dark surfaces -- D1 and D2
+
+   The prototype keys every inverted treatment off `.on-dark`, a class it puts
+   on the band. The build has no such class, but it does have something with
+   exactly the same extension: core prints `has-forest-900-background-color`
+   on any block whose backgroundColor preset is forest-900, which is the only
+   dark surface in the palette (contract 4). So that class IS `.on-dark` here,
+   and using it means a band becomes dark-aware by choosing the dark
+   background -- there is no second thing for a pattern author to remember.
+
+   D1 was a WCAG AA failure: the eyebrow inherited the light-surface sage-600
+   (#4A7355) onto forest-900 for 2.82:1. main.css:311 says sage-300 on dark.
+   -------------------------------------------------------------------------- */
+
+/* D2. main.css:1658 -- body copy on dark is muted, headings stay solid, and
+   the two-tone split is the hierarchy. The band carries `has-sand-50-color`,
+   which core prints with !important, but that lands on the BAND; children get
+   it by inheritance, and inheritance has no specificity. A class-level rule
+   on the child therefore wins without needing !important of its own. */
+.has-forest-900-background-color :where(p, li, figcaption, dd, dt) {
+	color: var(--wp--custom--color--text-invert-muted);
+}
+
+/* Headings stay at full strength -- main.css:1659. */
+.has-forest-900-background-color :where(h1, h2, h3, h4, h5, h6) {
+	color: var(--wp--custom--color--text-invert);
+}
+
+/* D1. main.css:311. Declared after 12.1's paragraph rule because .bp-eyebrow
+   IS a paragraph: same specificity, later wins. */
+.has-forest-900-background-color .bp-eyebrow {
+	color: var(--wp--preset--color--sage-300);
+}
+
+/* A tick list on dark loses its light-surface disc -- main.css:849. */
+.has-forest-900-background-color .tick-list li::before {
+	background-color: rgba(255, 255, 255, 0.12);
+}
+
+
+/* --------------------------------------------------------------------------
+  12.2  Card, benefit, perk and step titles -- D3
+
+   The prototype has THREE title treatments and the build had collapsed all
+   three into the h3 role (Fraunces 24/600/30/-0.24). None of them is the h3
+   role. Each class below carries only the properties that DIFFER from the
+   element it sits on, so the shared properties still come from one place:
+
+     .card__title  h3 -> Figtree 19/600/1.35, keeps h3's -0.01em tracking
+     .step__title  h3 -> 19px only; family, leading and tracking stay h3's
+     .benefit__title / .perk__title  <p> -> weight and colour only; 17px,
+                                     1.7 leading and normal tracking are
+                                     already the body role
+
+   The last pair are paragraphs in the prototype, not headings, so they are
+   paragraphs here. That is also why the document outline no longer carries
+   ten entries the design never had.
+   -------------------------------------------------------------------------- */
+
+/* main.css:753 */
+.card__title {
+	font-family: var(--wp--preset--font-family--figtree);
+	font-size: var(--wp--preset--font-size--large);
+	font-weight: 600;
+	line-height: 1.35;
+	color: var(--wp--custom--color--text);
+}
+
+/* pages.css:196 -- Fraunces is inherited from the h3 role on purpose. */
+.step__title {
+	font-size: var(--wp--preset--font-size--large);
+	font-weight: 600;
+	color: var(--wp--custom--color--text);
+}
+
+/* pages.css:207 and pages.css:364 -- both are <p>. */
+/* pages.css:113-120 -- the page hero's own padding.
+
+   The hero was using the full section rhythm, 100.8px top and bottom at 1440,
+   where the prototype gives it 32px above and a fluid 40-72 below: 68px of
+   dead space over the breadcrumb on every interior page. The patterns no
+   longer carry an inline padding for this band -- an inline style beats any
+   class, so the class could not have won while it was there. One owner.
+   Measured before: 100.8 / 100.8 at 1440, 56 / 56 at 390.
+   Prototype: 32 / 72 at 1440, 32 / 40 at 390. */
+.bp-page-hero {
+	padding-top: var(--wp--preset--spacing--60);
+	padding-bottom: clamp(2.5rem, 6vw, 4.5rem);
+	border-bottom: 1px solid var(--wp--custom--color--border);
+}
+
+/* A sand hairline on forest-900 is a bright line across a dark band. */
+.bp-page-hero.has-forest-900-background-color {
+	border-bottom-color: var(--wp--custom--color--border-dark);
+}
+
+/* pages.css:124+539 -- the page hero's gap is FLUID, and 56 is only its cap:
+   `clamp(2rem, 5vw, 3.5rem)`, against the sections' 4.5rem cap. Shipped flat at
+   56 first, which is correct from 1200 up and therefore correct at 1440, while
+   the band has stacked at 390 and has no gap at all -- so both gated widths
+   passed and five of eleven swept widths were 5-24px out. This is the third
+   time a gap has been written flat where the prototype's curve is fluid; the
+   family is now swept end to end by qa/bands-gap-sweep.mjs rather than sampled.
+
+   The
+   RATIO is the same 1.15/0.85 the --lead rung already carries, so only the gap
+   is restated here; with 56 subtracted the tracks resolve to 644 / 476, which
+   is what contract 8 records and what the prototype measures.
+
+   Repeat the block class for (0,2,0) -- the base declaration is
+   `.wp-block-columns.bp-split-cols`, and a single-class override of a custom
+   property loses to it silently. */
+.wp-block-columns.bp-split-cols--pagehero {
+	--bp-split-gap: clamp(2rem, 5vw, 3.5rem);
+}
+
+/* pages.css:149 -- the strip band itself, shared by both trust strips.
+
+   `border-block` is a hairline on the TOP AND BOTTOM edges, and neither built
+   strip had it: the stats strip has been shipping a borderless white band
+   since it was written, and the features strip had no band wrapper at all. The
+   band reads as a seam between two sections, so without the two rules it is
+   just a white gap. The background comes from the block's own `white` preset
+   attribute, which core prints with !important, so this rule must not set one.
+   Prototype: 1px solid sand-200 on both edges. */
+.bp-trust-strip {
+	border-block: 1px solid var(--wp--custom--color--border);
+}
+
+/* main.css .card__text / pages.css .step__text -- the small body copy inside a
+   card or a step. Both measured ink-700 at 1.7 against the prototype's ink-600
+   at 1.65: one tone too dark and one notch too loose, on every card and every
+   step on the site. NOT a size problem -- both sides are 15px. The 17px forest
+   reading in the brief was the step's NUMBER TILE, not its body copy.
+
+   `.bp-card-light` is excluded: on a forest-900 band the tone inverts, and the
+   rule that does that is (0,2,0), which this selector would otherwise outrank.
+   Measured before: rgb(51,61,55), line-height 25.5px.
+   Prototype: rgb(85,96,90), line-height 24.75px. */
+.bp-panel:not(.bp-card-light) p.has-small-font-size,
+.bp-panel:not(.bp-card-light) .card__text,
+.bp-steps-row p.has-small-font-size,
+.bp-steps-stack p.has-small-font-size {
+	color: var(--wp--custom--color--text-muted);
+	line-height: 1.65;
+}
+
+/* pages.css:158-159 -- the feature trust strip's item. Weight and leading
+   only: both sizes are preset attributes on the block (medium / small), so
+   this carries what a preset cannot. Consumed by trust-strip-features. */
+.trust-strip__title {
+	font-weight: 600;
+	line-height: 1.35;
+	color: var(--wp--custom--color--text);
+}
+
+/* The 2px is pages.css:159's own `margin-top`, and dropping it while porting
+   the leading and the tone put the band 2px tall: 155.438 against the
+   prototype's 153.438. The item group's blockGap is 0 so that this margin is
+   the only thing setting the distance -- the stats strip keeps its 4px
+   blockGap, which measures exact, because `.stat` has no such rule. */
+.trust-strip__text {
+	margin-top: 2px;
+	line-height: 1.55;
+	color: var(--wp--custom--color--text-muted);
+}
+
+.benefit__title,
+.perk__title {
+	font-weight: 600;
+	color: var(--wp--custom--color--text);
+}
+
+.benefit__title {
+	margin-bottom: 2px;
+}
+
+/* On dark, a title is a heading-strength colour, not muted body copy. 12.1
+   would otherwise mute the two paragraph titles. */
+.has-forest-900-background-color :where(.benefit__title, .perk__title),
+.has-forest-900-background-color :where(.card__title, .step__title) {
+	color: var(--wp--custom--color--text-invert);
+}
+
+
+/* --------------------------------------------------------------------------
+  12.3  The Display and Heading-1 roles -- D4
+
+   Contract 5 gives the Display role leading 1.06 and tracking -0.02em, but
+   nothing carried them: `display` is a fontSize preset, and a fontSize preset
+   has no slot for leading in theme.json. The hero therefore inherited
+   whichever heading element it happened to be, which after the h1->h2
+   demotion meant h2's 1.14/-0.015em -- +5.44px per line at 1440.
+
+   Attaching the values to the preset's own class fixes it AT THE ROLE: any
+   block using the Display size gets Display leading, whatever heading level
+   it is, and the heading level stays free to serve the document outline.
+   Core prints the preset class rule as `.has-display-font-size{font-size:..}`
+   with no leading of its own, so there is no conflict -- and a class beats
+   theme.json's element selector (0,0,1) without !important.
+   -------------------------------------------------------------------------- */
+
+/* main.css:249 -- .h1--hero */
+.has-display-font-size {
+	line-height: 1.06;
+	letter-spacing: -0.02em;
+}
+
+/* main.css:241 -- the non-hero h1 role, pinned to its preset for the same
+   reason: the three page heroes render it on an h2. */
+.has-heading-1-font-size {
+	line-height: 1.1;
+	letter-spacing: -0.018em;
+}
+
+
+/* --------------------------------------------------------------------------
+  12.4  Interaction states -- D6
+
+   Three states were absent, and the focus ring is the one that matters: it is
+   on every interactive element on the site and it was the user-agent default.
+   -------------------------------------------------------------------------- */
+
+/* Focus. main.css:226. `:where()` contributes no specificity, exactly as the
+   prototype's own rule does, so a component may still override the ring
+   without an !important war. theme.json's elements.link :focus outline was
+   REMOVED in the same change: two owners for one ring is how a 3px rule ends
+   up rendering 2px. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+	outline: 3px solid var(--wp--custom--color--focus);
+	outline-offset: 2px;
+	border-radius: var(--wp--custom--radius--sm);
+}
+
+/* main.css:231 -- forest green on forest green is not a focus ring. */
+.has-forest-900-background-color :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+	outline-color: var(--wp--custom--color--focus-invert);
+}
+
+/* --- D1. The resting button box. main.css:494-518 -----------------------
+
+   Four numbers were wrong at once and all four came from a default nobody
+   chose: theme.json's elements.button radius is `full`, and the padding,
+   border and height were core's block stylesheet. Hover was already correct,
+   so what a visitor saw was the right hover on the wrong base.
+
+   Cascade: core's `:where(.wp-block-button__link)` carries the 9999px radius
+   and the calc() padding at ZERO specificity, and theme.json's elements.button
+   prints `:root :where(.wp-block-button__link)` at (0,1,0). The selector pair
+   below is (0,2,0) and bands.css prints after global-styles, so no !important
+   is needed anywhere in this block.
+
+   OPEN WITH MAIN -- theme.json `styles.elements.button.border.radius` is
+   `var:custom|radius|full` and needs `var:custom|radius|md` (10px). Until Main
+   moves it, the editor canvas will still draw pills while the front end draws
+   the design. This rule is not the long-term owner of the radius.
+
+   Measured before: radius 999px, padding 12.672/23.328 (10.672/21.28 outline),
+   no min-height, height 41.344. Prototype: radius 10px, padding 12/24,
+   min-height 48, height 48.
+
+   The 1.5px transparent border is on the base, not just the outline variant,
+   because it is what keeps a filled and an outlined button the same size --
+   the prototype's own reason for putting it there. */
+.wp-block-button .wp-block-button__link,
+.wp-block-button .wp-element-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--wp--preset--spacing--20);
+	min-height: 48px;
+	padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--50);
+	border: 1.5px solid transparent;
+	border-radius: var(--wp--custom--radius--md);
+	line-height: 1;
+	letter-spacing: 0.005em;
+	text-align: center;
+}
+
+/* main.css:534 -- the outline button, the design's secondary action. Core's
+   own `is-style-outline` is a 2px currentColor rectangle, which on this
+   palette resolved to a 2px ink-900 border and ink-900 text: a heavier
+   element than the accent button it sits beside. The design's secondary is
+   quiet -- forest text on a 1.5px sand border, no fill.
+   Measured before: 2px rgb(28,38,32) border, rgb(28,38,32) text.
+   Prototype: 1.5px (resolves 1px) rgb(216,206,189), rgb(31,74,58) text. */
+.wp-block-button.is-style-outline > .wp-block-button__link,
+.wp-block-button.is-style-outline > .wp-element-button {
+	background-color: transparent;
+	color: var(--wp--custom--color--primary);
+	border-color: var(--wp--custom--color--border-strong);
+	padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--50);
+}
+
+/* main.css:537 -- the ghost button. Same text colour as the outline, no
+   border at all. The prototype uses it for the lower-weight of two actions in
+   a split band, where an outline would compete with the accent beside it. */
+.wp-block-button.is-style-ghost > .wp-block-button__link,
+.wp-block-button.is-style-ghost > .wp-element-button {
+	background-color: transparent;
+	color: var(--wp--custom--color--primary);
+	border-color: transparent;
+}
+
+.wp-block-button.is-style-ghost > .wp-block-button__link:hover,
+.wp-block-button.is-style-ghost > .wp-element-button:hover {
+	background-color: var(--wp--preset--color--forest-100);
+	box-shadow: none;
+}
+
+/* main.css:543 -- btn--outline-dark. On a forest-900 band the outline button
+   inverts: sand text on a 14%-white border. This is a CONTEXT rule rather than
+   a fifth style variation, because the prototype never puts an outline-dark
+   button on a light surface -- the surface decides, so the surface selects. */
+.has-forest-900-background-color .wp-block-button.is-style-outline > .wp-block-button__link,
+.has-forest-900-background-color .wp-block-button.is-style-outline > .wp-element-button {
+	color: var(--wp--custom--color--text-invert);
+	border-color: var(--wp--custom--color--border-dark);
+}
+
+.has-forest-900-background-color .wp-block-button.is-style-outline > .wp-block-button__link:hover,
+.has-forest-900-background-color .wp-block-button.is-style-outline > .wp-element-button:hover {
+	background-color: rgba(255, 255, 255, 0.08);
+	border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* main.css:546 -- btn--lg. The only size rung the bands use, and the only
+   place 17px appears on a button: `medium` is the 1.0625rem preset, which is
+   --text-base in the prototype. Carried as a class on the wp:button block so
+   that one day it can become a registered size preset without the markup
+   changing shape.
+   Measured before: no large rung existed -- every button was 16px/48-ish.
+   Prototype: 17px, padding 16/32, min-height 56. */
+.wp-block-button.bp-btn--lg > .wp-block-button__link,
+.wp-block-button.bp-btn--lg > .wp-element-button {
+	min-height: 56px;
+	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--60);
+	font-size: var(--wp--preset--font-size--medium);
+}
+
+/* Buttons. main.css:494-520. The transition has to be declared on the resting
+   state or the hover snaps. */
+.wp-element-button,
+.wp-block-button__link {
+	transition:
+		background-color var(--wp--custom--transition--base),
+		border-color var(--wp--custom--transition--base),
+		color var(--wp--custom--transition--base),
+		transform var(--wp--custom--transition--fast),
+		box-shadow var(--wp--custom--transition--base);
+}
+
+.wp-element-button:hover,
+.wp-block-button__link:hover {
+	transform: translateY(-1px);
+	box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.wp-element-button:active,
+.wp-block-button__link:active {
+	transform: translateY(0);
+	box-shadow: none;
+}
+
+/* main.css:531 -- the accent button. A backgroundColor PRESET attribute is
+   printed by core as `.has-terracotta-600-background-color{background-color:
+   var(..) !important}`, so the resting colour is !important and a hover
+   without one silently loses. This is why the built button had no hover at
+   all. The !important here is answering core's, not decorating. */
+.wp-block-button__link.has-terracotta-600-background-color:hover {
+	background-color: var(--wp--preset--color--terracotta-700) !important;
+}
+
+/* main.css:535 -- the outline button. */
+.wp-block-button.is-style-outline > .wp-block-button__link:hover {
+	background-color: var(--wp--preset--color--forest-100);
+	border-color: var(--wp--custom--color--primary);
+}
+
+/* main.css:1314-1330 -- the accordion trigger. core/accordion renders the
+   trigger as a button inside the heading, so the colour has to land on the
+   button.
+
+   D4. The question is a LABEL, not a heading. `headingLevel` is a real
+   core/accordion-heading attribute and the pattern already sets level 3, which
+   is the level the prototype uses -- so the semantics were right and only the
+   type was wrong. The h3 was inheriting the heading role's Fraunces 24px
+   (22px at 390) and reading as a serif sub-head in a list of questions.
+   Nothing here touches the heading element itself: the h3 stays an h3 and
+   keeps its place in the document outline. Only the button inside it is typed.
+   Measured before: Fraunces 24px, padding 8px 0, row 46px.
+   Prototype: Figtree 17px/1.5, padding 16px 0, min-height 56, row 59px. */
+.wp-block-accordion-heading__toggle {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: var(--wp--preset--spacing--50);
+	width: 100%;
+	min-height: 56px;
+	padding-block: var(--wp--preset--spacing--40);
+	font-family: var(--wp--preset--font-family--figtree);
+	font-size: var(--wp--preset--font-size--medium);
+	font-weight: 600;
+	line-height: 1.5;
+	text-align: left;
+	color: var(--wp--custom--color--text);
+	transition: color var(--wp--custom--transition--base);
+}
+
+/* main.css:1312-1313 -- the rules that separate one question from the next,
+   and the reason the prototype's row measures 59px against a 58px trigger:
+   the extra pixel is the item's own bottom border. Without them the questions
+   run together as an undivided block of text.
+   Measured before: no borders, row 46px. Prototype: row 59px. */
+.wp-block-accordion {
+	border-top: 1px solid var(--wp--custom--color--border);
+}
+
+.wp-block-accordion-item {
+	border-bottom: 1px solid var(--wp--custom--color--border);
+}
+
+.has-forest-900-background-color .wp-block-accordion,
+.has-forest-900-background-color .wp-block-accordion-item {
+	border-color: var(--wp--custom--color--border-dark);
+}
+
+/* main.css:1333-1335 -- the animated open.
+
+   The prototype animates `grid-template-rows: 0fr -> 1fr`, which is the only
+   way to transition to an auto height. core binds the `hidden` ATTRIBUTE on
+   the panel (accordion-item.php:49, `data-wp-bind--hidden`), and hidden is
+   display:none in the UA sheet, so there was nothing to animate: the built
+   panel opened in one frame.
+
+   display is restored here so the grid track can run. `hidden` still does its
+   real job -- the delayed `visibility` keeps the closed panel out of the
+   accessibility tree and out of the tab order, which the prototype's own
+   markup does NOT do. The 0s delay on close is what lets the row finish
+   collapsing before the content is taken away; opening has no delay.
+
+   grid-auto-rows carries the same two values so that a panel an editor has
+   added a second block to still collapses -- an implicit row would otherwise
+   size to auto and leak its content out of a closed panel.
+   Measured before: display block, no grid track, no transition. */
+.wp-block-accordion-panel {
+	display: grid;
+	grid-template-rows: 1fr;
+	grid-auto-rows: 1fr;
+	transition: grid-template-rows var(--wp--custom--transition--slow), visibility 0s;
+}
+
+.wp-block-accordion-panel[hidden] {
+	display: grid;
+	grid-template-rows: 0fr;
+	grid-auto-rows: 0fr;
+	transition: grid-template-rows var(--wp--custom--transition--slow), visibility 0s 380ms;
+	visibility: hidden;
+}
+
+.wp-block-accordion-panel > * {
+	min-height: 0;
+	overflow: hidden;
+}
+
+/* main.css:1336 -- the answer's own box, which was never ported. The trigger
+   was exact and the panel was not, because the ANSWER was running the full
+   760px measure with no bottom padding: 86.672px open against the prototype's
+   110.672 for the same words. The type is identical on both sides (17px /
+   28.9px); it is the measure and the padding that differ.
+   The prototype hangs this off `.accordion__panel-inner > div`; core's panel
+   has no inner wrapper at all, so the answer's own blocks are the direct
+   children and the rule belongs on `> *`. Written as `> * > *` first, it
+   matched nothing and the panel measured unchanged -- the selector has to fit
+   the markup that exists, not the markup being ported from.
+   The gutter is --space-8, which is 3rem = 48px. I first read it as 32 and
+   used spacing|60; `--space-6` is 2rem and `--space-8` is 3rem, and the names
+   do not count in fours.
+
+   `max-width: 70ch` is ported because the prototype declares it, but it never
+   binds on either side: measured like for like inside the panel's own
+   paragraph, after document.fonts.ready, 70ch is 770px on BOTH -- Figtree
+   17px/400, identical. My earlier "9.26px per ch" was 648/70, arithmetic from
+   a width rather than a measurement of the metric, which is the same mistake
+   in miniature as comparing two different elements.
+   Measured before: inner 760px wide, padding 0, colour ink-700.
+   Prototype: 696px box, 48px right gutter, 648px of text, 24px below,
+   ink-600. */
+.wp-block-accordion-panel > * {
+	max-width: 70ch;
+	padding-right: var(--wp--preset--spacing--80);
+	color: var(--wp--custom--color--text-muted);
+}
+
+/* The 24px sits under the ANSWER, once, not under every paragraph in it. */
+.wp-block-accordion-panel > *:last-child {
+	padding-bottom: var(--wp--preset--spacing--50);
+}
+
+.has-forest-900-background-color .wp-block-accordion-panel > * {
+	color: var(--wp--custom--color--text-invert-muted);
+}
+
+/* main.css:1716 -- the right gutter is a desktop affordance; at narrow widths
+   it is just lost measure. */
+@media (max-width: 767px) {
+	.wp-block-accordion-panel > * {
+		padding-right: 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.wp-block-accordion-panel,
+	.wp-block-accordion-panel[hidden] {
+		transition: none;
+	}
+}
+
+.wp-block-accordion-heading__toggle:hover {
+	color: var(--wp--custom--color--primary);
+}
+
+.has-forest-900-background-color .wp-block-accordion-heading__toggle:hover {
+	color: var(--wp--preset--color--sage-300);
+}
+
+/* main.css:1734 -- the prototype drops the lift, not the colour change, when
+   the visitor has asked for less motion. */
+@media (prefers-reduced-motion: reduce) {
+	.wp-element-button:hover,
+	.wp-block-button__link:hover {
+		transform: none;
+	}
+}
+
+
+/* --------------------------------------------------------------------------
+  12.5  Panel geometry -- D7
+
+   The 40.375px side padding was not a token and not a gutter: it is core's
+   opinionated block stylesheet, `:where(.wp-block-group.has-background){
+   padding:1.25em 2.375em}`, enabled by add_theme_support('wp-block-styles').
+   2.375em x the 17px body size = 40.375px exactly. The patterns had set only
+   top and bottom, so core filled the two sides it left unstated.
+
+   Rather than drop wp-block-styles -- which would move a dozen unrelated core
+   blocks in one step -- the panel states all four sides itself. Core's rule
+   is wrapped in :where(), so it carries zero specificity and any class rule
+   settles it. The patterns no longer carry inline padding: one owner.
+   -------------------------------------------------------------------------- */
+
+.bp-panel {
+	padding: var(--wp--preset--spacing--50);
+}
+
+/* D8. The panel that sits in a split's second column: services/*.html give it
+   `padding:var(--space-6)` inline, one rung above the card default. */
+.bp-panel--md {
+	padding: var(--wp--preset--spacing--60);
+}
+
+/* D2. The framed-statement card: main.css gives .card 24px by default, and
+   about.html's mission/vision pair overrides it to --space-7 (40px) inline.
+   A rung here rather than inline padding on the block keeps 12.5's rule that
+   the panel has exactly one padding owner. */
+.bp-panel--lg {
+	padding: var(--wp--preset--spacing--70);
+}
+
+/* The CTA surface is a different component from the card: main.css:1548 gives
+   it radius-xl and a square clamp, against the card's radius-lg and 24px. */
+.bp-cta {
+	padding: clamp(2.5rem, 6vw, 4.5rem);
+	border-radius: var(--wp--custom--radius--xl);
+}
+
+
+/* --------------------------------------------------------------------------
+  12.6  Home hero band padding -- D8
+
+   pages.css:28 is asymmetric on purpose -- the hero sits tighter under the
+   header than it does above the band below it -- and the bottom grows again
+   at 1024. The band had been given `section-y-lg` on both sides, which is a
+   symmetric 129.6px at 1440 and 83px too tall.
+
+   This cannot be a block spacing attribute: core prints those inline, and an
+   inline style cannot carry a media query. So the pattern states no padding
+   and the class owns both numbers.
+   -------------------------------------------------------------------------- */
+
+.bp-hero-home {
+	padding-top: clamp(2.5rem, 6vw, 4.5rem);
+	padding-bottom: clamp(3rem, 7vw, 5.5rem);
+}
+
+/* pages.css:568 */
+@media (min-width: 64rem) {
+	.bp-hero-home {
+		padding-bottom: clamp(4rem, 8vw, 6.5rem);
+	}
+}
+
+
+/* --------------------------------------------------------------------------
+  12.7  The in-band section head -- D5
+
+   `section-head` and `section-head-split` were being placed as siblings of a
+   band, so they rendered as bare transparent groups on the body background
+   above it: the head and its grid were two surfaces where the prototype has
+   one <section>. The band patterns that need a head now carry it INSIDE their
+   own wrapper, which is the only arrangement that cannot come apart.
+
+   main.css:414 -- the measure and the 48px drop to the grid.
+   -------------------------------------------------------------------------- */
+
+.bp-head {
+	max-width: 56ch;
+}
+
+
+/* --------------------------------------------------------------------------
+  13  The three static bands added by track B
+
+   `sil-feature`, `article-header` and `property-gallery`. Every value below
+   is a token or a ratio; nothing here is a hex, and the two numbers that are
+   literal (the 4/3 and 16/10 aspect ratios, and the 2px thumb frame) are
+   ratios and a hairline, not spacing or colour.
+   -------------------------------------------------------------------------- */
+
+/* 13.1  Media placeholders.
+
+   Every image in these bands ships as an EMPTY core/image: a figure with no
+   img inside it, so an editor sees the upload placeholder and the front end
+   renders a figure with no content. Without a declared box that figure is 0px
+   tall and the band measures wrong until the day someone uploads a photo. The
+   ratio and the placeholder surface therefore live on the class, and they stay
+   correct once a real image lands because the img is told to fill the box. */
+.bp-media {
+	margin: 0;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: var(--wp--preset--spacing--50);
+	border-radius: var(--wp--custom--radius--lg);
+	background-color: var(--wp--preset--color--sage-100);
+	border: 1px solid var(--wp--preset--color--sage-300);
+	overflow: hidden;
+	/* NO `max-width: 100%` HERE, and it must not come back.
+
+	   It was added to stop an aspect-ratio box back-solving width from a
+	   min-height floor. That floor now exists in exactly one place -- the home
+	   hero above 1335px -- and that rule sets `max-width: none` itself, so the
+	   cap here guarded nothing and cost two things:
+
+	   1. core caps a constrained band's children with a ZERO-specificity
+	      :where() selector, written that way precisely so a theme can override
+	      it. A (0,1,0) class rule therefore wins, and .bp-media became the one
+	      child of a constrained band that ignores the measure. Measured:
+	      article-header's frame 1176 where its siblings were 696.
+	   2. it silently suppressed the card bleed. `.bp-panel > .bp-media` carries
+	      negative margins to sit flush to the card edge; the cap held it to the
+	      card's content box instead. Measured: 325.98 against the prototype's
+	      374 in a 376 card, on every card on the site. Without the cap: 373.98.
+
+	   The overhang guard that replaced it is the hero's own 1335px breakpoint,
+	   which is derived rather than chosen -- see section 13.
+	   Verified after removal: 0 document overflow at 390 and 1440, headless and
+	   headed, and the hero overhang unchanged at 79.11px from 1400 up. */
+	/* A FLOOR, not a design default: an unmodified box must never be the
+	   0px-tall figure of 13.1. Every box this theme ships names its ratio. */
+	aspect-ratio: 3 / 2;
+}
+
+/* D9. main.css .image-placeholder -- the hatched surface. The prototype writes
+   the stripe as `rgba(var(--rgb-sage), .10)`, and --rgb-sage is one of the five
+   raw triplets deleted in 4, so it becomes a color-mix of the same sage-600.
+   These are NOT the same number: rgba(74,115,85,.10) composites 10% of the
+   colour over whatever is behind it, while
+   `color-mix(... 10%, transparent)` produces a premultiplied rgba(74,115,85,
+   0.1). Those are NOT the same rendered pixel: measured on a 36x36 crop of the
+   flat interior, the prototype's stripe is rgb(212,225,213) and the
+   transparent mix rendered rgb(211,224,212) -- 1/255 low on every channel,
+   because the two composite in different precisions and 227*0.9 + 74*0.1 =
+   211.7 falls either side of the round.
+
+   Mixing against the frame's own opaque sage-100 fill instead of transparent
+   removes the compositing step: the stripe is computed once, at full
+   precision, and lands on 212 as the prototype does. Measured identical
+   afterwards -- same two colours, same pixel counts.
+
+   The paint applies only while the slot is empty of an image. A real photo
+   must not sit inside 24px of hatched padding, so :has(img[src]) takes it all back
+   off -- :has() is the container-side complement of the :empty rule at 13.4,
+   and unlike :empty it survives the slot holding a visible label. */
+.bp-media:not(:has(img[src])) {
+	background-image: linear-gradient(
+		135deg,
+		color-mix(in srgb, var(--wp--preset--color--sage-600) 10%, var(--wp--preset--color--sage-100)) 25%,
+		transparent 25%,
+		transparent 50%,
+		color-mix(in srgb, var(--wp--preset--color--sage-600) 10%, var(--wp--preset--color--sage-100)) 50%,
+		color-mix(in srgb, var(--wp--preset--color--sage-600) 10%, var(--wp--preset--color--sage-100)) 75%,
+		transparent 75%
+	);
+	background-size: 18px 18px;
+}
+
+.bp-media:has(img[src]) {
+	padding: 0;
+	display: block;
+	background-image: none;
+	background-color: var(--wp--custom--color--bg-soft);
+	border-color: var(--wp--custom--color--border);
+}
+
+/* The brief for the photograph that belongs here. A real element, addressable
+   by the page composer, because "Map -- Church Street, Parramatta" and
+   "Accessible Bathroom" are different briefs; a CSS `content:` string would be
+   one string for 77 slots and unreadable to a screen reader.
+
+   No role="img"/aria-label on the frame: the label is VISIBLE text, so it is
+   already in the accessibility tree, and an aria-label on the group would
+   REPLACE it rather than add to it. It would also have to be an attribute on a
+   core/group wrapper, which the editor regenerates from attributes on save --
+   the same class of trap measured for D8. Proof of the announced name is in
+   qa/bands-placeholder-measure.mjs, which reads the computed accessible name,
+   not the markup. */
+.bp-media__label {
+	max-width: 26ch;
+	margin: 0;
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 600;
+	line-height: 1.45;
+	text-align: center;
+	color: var(--wp--custom--color--primary);
+}
+
+.bp-media:has(img[src]) .bp-media__label {
+	display: none;
+}
+
+/* The box is a GROUP, not the image block: an empty core/image renders as
+   nothing at all on the front end (render_block_core_image returns '' when
+   there is no img), so a figure-only placeholder measured zero elements, not
+   zero height. The group always renders; the image block lives inside it and
+   is what the client replaces. */
+.bp-media > .wp-block-image {
+	margin: 0;
+	height: 100%;
+}
+
+/* A media-less core/image is only VALID to the editor if its innerHTML holds
+   the <img alt=""/> that core's save() emits -- an empty <figure> is a
+   validation failure, MEASURED in the editor (15/15 blocks invalid), not
+   inferred. Patterns therefore ship that bare <img>.
+
+   It never reaches the front end: wp-includes/blocks/image.php:56 returns ''
+   when the img has no src, so the figure renders as nothing at all and the
+   geometry here is unchanged -- 69 frames measured identical before and after.
+   That is also why the :has() tests below say img[src] rather than img: the
+   question is "is a real photo here", and in the EDITOR canvas the bare <img>
+   is absent but the upload placeholder is not.
+
+   Do NOT add a rule that hides this figure. WP inlines this stylesheet into
+   the block-editor canvas, and an unscoped `display:none` on it was measured
+   zeroing the upload placeholder's box -- valid, invisible, uneditable. There
+   is nothing to hide on the front end anyway. */
+
+/* The empty core/image inside a labelled frame renders zero elements (13.1),
+   but the editor still draws its upload placeholder, and a flex row would sit
+   it beside the label. The frame stacks while it is a placeholder. */
+.bp-media:not(:has(img[src])) {
+	flex-direction: column;
+	gap: var(--wp--preset--spacing--30);
+}
+
+.bp-media img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* --- the ratio rungs, main.css:652-658 --------------------------------------
+
+   Counted across all 20 prototype documents, because the guidance I was given
+   (3/2 is the default; 4/3 and 1/1 are declared and unused) was wrong in both
+   halves and would have mis-cropped about a third of the 77 placeholders:
+
+     --square-top 35   --ratio-3-2  13
+     --ratio-4-3  25   --portrait    9
+     --property   15   --accent      3
+     --ratio-16-9 14   --dark        2
+     --tall        1   --ratio-1-1   0   <- the genuinely unused one
+
+   So 4/3 is the most common and 3/2 is fifth. The base above keeps 3/2 only as
+   a FLOOR so that an unmodified box is never the 0px-tall figure that 13.1 was
+   written to stop -- it is not a design default, and every box this theme ships
+   states its ratio explicitly. --ratio-1-1 is not built: zero uses.
+
+   These carry the prototype's own names. The two rungs that used to live here,
+   --hero (16/10) and --wide (16/9), were this layer's invented names for
+   --property and --ratio-16-9; renamed rather than aliased, because two names
+   for one number is how a value ends up declared twice and half-changed. */
+.bp-media--ratio-16-9 {
+	aspect-ratio: 16 / 9;
+}
+
+.bp-media--ratio-4-3 {
+	aspect-ratio: 4 / 3;
+}
+
+.bp-media--ratio-3-2 {
+	aspect-ratio: 3 / 2;
+}
+
+.bp-media--portrait {
+	aspect-ratio: 3 / 4;
+}
+
+.bp-media--property {
+	aspect-ratio: 16 / 10;
+}
+
+.bp-media--tall {
+	aspect-ratio: 4 / 5;
+}
+
+/* main.css:682. Used 35 times -- the most common modifier of all. It is the
+   frame sitting flush on top of a card, so the bottom corners square off and
+   the bottom border goes, or the card draws two lines across its own middle. */
+.bp-media--square-top {
+	border-radius: var(--wp--custom--radius--lg) var(--wp--custom--radius--lg) 0 0;
+	border-bottom: none;
+}
+
+/* main.css:661 and 671 -- the two tinted frames. Each restates the hatch in
+   its own hue, and each mixes against its OWN opaque fill rather than through
+   transparent, for the rounding reason recorded above. */
+.bp-media--accent:not(:has(img[src])) {
+	background-color: var(--wp--preset--color--terracotta-100);
+	background-image: linear-gradient(
+		135deg,
+		color-mix(in srgb, var(--wp--preset--color--terracotta-600) 8%, var(--wp--preset--color--terracotta-100)) 25%,
+		var(--wp--preset--color--terracotta-100) 25%,
+		var(--wp--preset--color--terracotta-100) 50%,
+		color-mix(in srgb, var(--wp--preset--color--terracotta-600) 8%, var(--wp--preset--color--terracotta-100)) 50%,
+		color-mix(in srgb, var(--wp--preset--color--terracotta-600) 8%, var(--wp--preset--color--terracotta-100)) 75%,
+		var(--wp--preset--color--terracotta-100) 75%
+	);
+	border-color: color-mix(in srgb, var(--wp--preset--color--terracotta-600) 30%, transparent);
+}
+
+.bp-media--accent .bp-media__label {
+	color: var(--wp--preset--color--terracotta-700);
+}
+
+.bp-media--dark:not(:has(img[src])) {
+	background-color: var(--wp--preset--color--forest-800);
+	background-image: linear-gradient(
+		135deg,
+		color-mix(in srgb, #fff 4%, var(--wp--preset--color--forest-800)) 25%,
+		var(--wp--preset--color--forest-800) 25%,
+		var(--wp--preset--color--forest-800) 50%,
+		color-mix(in srgb, #fff 4%, var(--wp--preset--color--forest-800)) 50%,
+		color-mix(in srgb, #fff 4%, var(--wp--preset--color--forest-800)) 75%,
+		var(--wp--preset--color--forest-800) 75%
+	);
+	border-color: rgba(255, 255, 255, 0.16);
+}
+
+.bp-media--dark .bp-media__label {
+	color: var(--wp--preset--color--sage-300);
+}
+
+/* pages.css:240-242 -- the gallery thumbnail is a CONTEXT, not a ratio: 4/3
+   with a smaller radius, no border, tighter padding, and the label suppressed
+   because the box is too small to carry it.
+
+   `display:none` would take the brief away from a screen reader as well as
+   from the eye, and the prototype keeps it reachable with an aria-label on the
+   frame. Clipping instead renders identically -- the label is out of flow, so
+   the box measures the same -- and keeps the brief announced. */
+.bp-media--thumb {
+	aspect-ratio: 4 / 3;
+	border-radius: var(--wp--custom--radius--sm);
+	border: none;
+	padding: var(--wp--preset--spacing--20);
+}
+
+.bp-media--thumb .bp-media__label {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+/* pages.css:63 and 569 -- the home hero frame. A context in the prototype
+   (`.hero__media .image-placeholder`), so a context here too: no new modifier
+   name for something the band already identifies.
+
+   THE OVERHANG, and why it is one rule and not two.
+
+   The frame is meant to bleed past the text column -- the prototype's hero
+   placeholder is 624px in a 544.891px column at 1440, overhanging by 79.11.
+   That gesture is real and is reproduced here. What is NOT real is the same
+   number at every other width. Swept across 13 viewports, the frame's right
+   edge against the viewport's:
+
+     390  right 500  vs 390    900  right  960 vs  900   1280 right 1307 vs 1280
+     600  right 580  vs 600   1024  right 1171 vs 1024   1320 right 1327 vs 1320
+     768  right 744  vs 768   1200  right 1265 vs 1200   1400 right 1367 vs 1400
+                              1240  right 1286 vs 1240   1440 right 1387 vs 1440
+
+   So from 900 to 1320 the frame ends PAST the viewport by 60 to 147px, and the
+   prototype reports zero document overflow at every one of them -- because
+   `.hero{overflow:hidden}` and `body{overflow-x:hidden}` slice it off. At 390
+   130px of a 480px frame is cut away. That is not a bleed; it is the
+   min-height/aspect-ratio artefact of 13.1 hidden behind two clips, and the
+   overflow check reads clean while the frame is being cut in half.
+
+   The boundary is arithmetic, not a guess. Above 1240 the container is fixed,
+   so the frame's right edge is `viewport/2 + 667.11`; it is inside the
+   viewport when `viewport/2 + 667.11 <= viewport`, i.e. from **1334.22px**.
+   Rounded up to 1335. Below it the frame fills its column and stops, via the
+   max-width above -- no clip, nothing hidden, nothing to reproduce, because
+   the prototype shows nothing there either.
+
+   No `overflow:hidden` is added to the band. Adopting the prototype's clip
+   would buy a green overflow number by hiding the defect it is meant to find. */
+.bp-hero-home .bp-media {
+	border-radius: var(--wp--custom--radius--xl);
+}
+
+@media (min-width: 1335px) {
+	.bp-hero-home .bp-media {
+		min-height: 26rem;
+		max-width: none;
+	}
+}
+
+/* A card's image is flush to the card edge on three sides -- main.css:758.
+   .bp-panel pads all four sides, so the media pulls that padding back out. */
+.bp-panel > .bp-media {
+	margin-top: calc(-1 * var(--wp--preset--spacing--50));
+	margin-left: calc(-1 * var(--wp--preset--spacing--50));
+	margin-right: calc(-1 * var(--wp--preset--spacing--50));
+	width: auto;
+	border-radius: var(--wp--custom--radius--lg) var(--wp--custom--radius--lg) 0 0;
+	border-top: none;
+	border-left: none;
+	border-right: none;
+}
+
+/* 13.2  The dark SIL band.
+
+   pages.css:214. The band paints forest-900 and carries a blob shape that is
+   positioned outside its own box; without `overflow:hidden` here that blob is
+   document-level horizontal overflow at every width, which is exactly what the
+   overflow gate measures. `position:relative` is what the blob is absolute to,
+   and the band's real children are lifted above it. */
+.bp-sil-feature {
+	position: relative;
+	overflow: hidden;
+}
+
+.bp-sil-feature > :not(.cta__shape) {
+	position: relative;
+	z-index: 1;
+}
+
+/* pages.css:215 -- the SIL blob is placed at the other corner from the CTA's
+   and is sage-only, so it overrides the shared .cta__shape geometry. */
+.bp-sil-feature > .cta__shape {
+	right: auto;
+	top: -20%;
+	left: -8%;
+	width: 30rem;
+	height: 30rem;
+	border-radius: 52% 48% 42% 58% / 48% 52% 48% 52%;
+	background: radial-gradient(
+		circle at 40% 40%,
+		color-mix(in srgb, var(--wp--preset--color--sage-500) 40%, transparent),
+		transparent 70%
+	);
+	opacity: 0.6;
+}
+
+/* 13.3  A light card on a dark band.
+
+   §12.1 recolours EVERY paragraph and heading under
+   `.has-forest-900-background-color` to the invert ramp, by descendant
+   selector. The SIL cards are white panels inside that band, so those rules
+   would put near-white text on a white card -- unreadable, and invisible to a
+   colour check that only looks at the band. The card re-asserts the light
+   ramp for its own subtree, at (0,2,0) and (0,3,0) against §12's (0,1,0). */
+.has-forest-900-background-color .bp-card-light :where(p, li, figcaption, dd, dt) {
+	color: var(--wp--custom--color--text-muted);
+}
+
+.has-forest-900-background-color .bp-card-light :where(h1, h2, h3, h4, h5, h6),
+.has-forest-900-background-color .bp-card-light .card__title {
+	color: var(--wp--custom--color--text);
+}
+
+/* 13.3b  ...and the same rule, aimed at the SURFACE instead of at a list of
+   element names.
+
+   MEASURED DEFECT, WCAG 1.4.3 failure on / : the region and access lines on
+   the three SIL property cards ("Parramatta", "Wheelchair accessible",
+   "Blacktown", "Step-free") rendered rgba(251,248,243,0.72) on the white card
+   at 1.06:1 -- invisible. The prototype renders the same lines rgb(85,96,90)
+   on white at 6.55:1.
+
+   The cause is not the hex and not 13.3's tone. It is WHERE the dark ramp is
+   picked up. Those lines are core/post-terms, which renders a <div> of <a>,
+   and the loop wraps each card in the post-template's <li>. 12.1 recolours
+   `:where(p, li, ...)` under the dark band, so it matches that li -- an
+   ANCESTOR of .bp-card-light -- and every div and anchor inside the white card
+   then INHERITS the invert tone. 13.3 could not take it back, because 13.3
+   also names elements, and a <div> is not in its list.
+
+   So the reset is stated on the card itself, which is the boundary where the
+   surface changes from forest-900 to white. Inheritance stops there and
+   everything inside starts again from the light ramp, whatever element it is
+   and whichever block core chooses to render it as. 13.3's element rules are
+   kept: they are what re-asserts the tone on the p/li that 12.1 matches
+   DIRECTLY inside the card, where inheritance would not reach.
+
+   The typed sibling of this band was never affected -- it writes the same two
+   lines as core/paragraph, which 13.3 did match. A defect that is invisible in
+   one of two patterns that render the same band is the argument for aiming at
+   the surface rather than at a list of tags. */
+.has-forest-900-background-color .bp-card-light {
+	color: var(--wp--custom--color--text-muted);
+}
+
+/* 13.4  Badges -- main.css:587. A badge is a paragraph here, so it needs the
+   inline-flex box stated on the class; core gives a paragraph nothing. */
+.badge {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--wp--preset--spacing--10);
+	width: fit-content;
+	padding: var(--wp--preset--spacing--10) var(--wp--preset--spacing--20);
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	line-height: 1.3;
+	border-radius: var(--wp--custom--radius--sm);
+	border: 1px solid transparent;
+	background-color: var(--wp--preset--color--forest-100);
+	color: var(--wp--preset--color--forest-700);
+}
+
+/* main.css:602 -- and these two win over 13.3 because they are declared after
+   it at equal or higher specificity. */
+.badge--available,
+.has-forest-900-background-color .bp-card-light .badge--available {
+	background-color: var(--wp--custom--color--success-bg);
+	color: var(--wp--custom--color--success);
+}
+
+.badge--limited,
+.has-forest-900-background-color .bp-card-light .badge--limited {
+	background-color: var(--wp--custom--status--warning-bg);
+	color: var(--wp--custom--status--warning);
+}
+
+/* 13.5  Property card specs -- main.css:770. The rule above the specs line is
+   what separates them from the address; it is the card's own border token. */
+.card__specs {
+	padding-top: var(--wp--preset--spacing--40);
+	border-top: 1px solid var(--wp--custom--color--border);
+}
+
+/* 13.6  Article meta -- pages.css:414. Rules above and below, muted, small. */
+.wp-block-group.article-meta {
+	padding-block: var(--wp--preset--spacing--40);
+	border-block: 1px solid var(--wp--custom--color--border);
+	align-items: center;
+}
+
+.wp-block-group.article-meta p {
+	color: var(--wp--custom--color--text-muted);
+}
+
+.article-meta__name.article-meta__name {
+	font-weight: 600;
+	color: var(--wp--custom--color--text);
+}
+
+/* 13.7  Property gallery -- pages.css:228. Four thumbnail tracks, so a fifth
+   thumbnail wraps onto a second row exactly as the prototype's does. The block
+   declares a flex layout so the editor has a layout to reason about; core
+   prints `display:flex` on a generated container class at (0,1,0), and the
+   repeated class below takes (0,2,0) to replace it with the grid. */
+.bp-gallery__thumbs.bp-gallery__thumbs {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: var(--wp--preset--spacing--30);
+}
+
+@media (max-width: 640px) {
+	.bp-gallery__thumbs.bp-gallery__thumbs {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+/* 13.8  The narrow measure -- 760 is the OUTER box, 696 is the readable one.
+
+   `"contentSize":"var(--wp--custom--container--narrow)"` is SILENTLY DROPPED:
+   wp_get_layout_style() returns the right CSS when called directly, but the
+   layout support's own path emits only the `.alignfull{max-width:none}` half
+   of the rule and never the max-width one, so the measure fell back to the
+   global 1176 with nothing in any log. Measured: h1 actualWidth 1112 at 1440.
+
+   Core's default constrained rule reads the measure from a custom property,
+   and custom properties inherit -- so redefining it on the band's own group is
+   a token reference that core cannot drop, because core never parses it.
+
+   760 IS NOT THE MEASURE. `--container-narrow: 760px` is the prototype's
+   `.container--narrow` max-width, and that box carries `padding-inline` on
+   both sides, so the readable column inside it is 760 - 32 - 32 = 696.
+   `contentSize` is a READABLE measure, so assigning the outer number to it
+   adds the gutter back and every prose band on the site ran 64px wide.
+
+   This is contract 2's own trap, which recorded the identical arithmetic for
+   the main measure -- 1240 outer, 1176 readable -- and said nothing about the
+   narrow one. Measured: prototype `.container--narrow` 760 box / 32 padding /
+   696 readable; this build 760 readable, 0 padding.
+
+   Why it survived a design-QA pass that called the narrow measure exact: at
+   390 both sides read 350, because the VIEWPORT binds before the cap does. A
+   check at 390 and 1440 sees a match at one width and a 64px error at the
+   other. Same shape as the hero gap being right at 1280+ and wrong at every
+   width in between -- gate at the rungs, sweep between them.
+
+   The root padding variables are used rather than a literal 32 so the sum
+   tracks the gutter's own step function: 2rem at 900 and 1440, 1.25rem at 390,
+   which is the prototype's 32 and 20. At 390 the result is 720 and the
+   viewport caps it at 350 regardless, so there is no change where there was no
+   error. */
+.bp-measure {
+	--wp--style--global--content-size: calc(
+		var(--wp--custom--container--narrow)
+		- var(--wp--style--root--padding-left)
+		- var(--wp--style--root--padding-right)
+	);
+}
+
+
+/* --------------------------------------------------------------------------
+  14  Callout and prose table -- routed from track C
+
+   The three legal pages carry one callout each and privacy carries a table.
+   Track C had rendered both from shipped classes only, which renders but does
+   not match. Both are band-level components, so both live here.
+   -------------------------------------------------------------------------- */
+
+/* pages.css:400. A callout is a core/group, so it states its own box. The
+   group ships `layout:{"type":"flex"}` for the icon-beside-text arrangement;
+   with a single text child it reads as a padded panel, which is the shape the
+   three legal pages use. */
+.bp-callout {
+	display: flex;
+	gap: var(--wp--preset--spacing--40);
+	padding: var(--wp--preset--spacing--50);
+	background-color: var(--wp--preset--color--sage-100);
+	border: 1px solid var(--wp--preset--color--sage-300);
+	border-radius: var(--wp--custom--radius--lg);
+}
+
+/* pages.css:409 */
+.bp-callout .callout__title {
+	font-weight: 600;
+	color: var(--wp--custom--color--text);
+}
+
+/* pages.css:410 */
+.bp-callout .callout__body {
+	line-height: 1.65;
+	color: var(--wp--custom--color--text-body);
+}
+
+/* pages.css:411. The prototype's accent border is a terracotta at 0.3 alpha
+   written from an --rgb-* triplet this theme does not carry; color-mix over
+   the preset is the same colour from the token. */
+.bp-callout.bp-callout--accent {
+	background-color: var(--wp--preset--color--terracotta-100);
+	border-color: color-mix(in srgb, var(--wp--preset--color--terracotta-600) 30%, transparent);
+}
+
+/* main.css:381-383. core/table inside the prose measure. */
+.bp-measure .wp-block-table table {
+	border-collapse: collapse;
+	width: 100%;
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.bp-measure .wp-block-table :where(th, td) {
+	padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--40);
+	text-align: left;
+	border-bottom: 1px solid var(--wp--custom--color--border);
+	vertical-align: top;
+}
+
+.bp-measure .wp-block-table th {
+	font-weight: 600;
+	color: var(--wp--custom--color--text);
+	background-color: var(--wp--custom--color--bg-soft);
+}
+
+
+/* --------------------------------------------------------------------------
+  15  Empty media slots that are not blocks -- the other half of §13.1
+
+   §13.1 gave every media placeholder a box by making it a GROUP, because an
+   empty core/image renders as nothing. Two slots could not take that shape and
+   were missed:
+
+   1. core/media-text's media slot is the block's OWN figure, not a container
+      another block can be put inside. Empty, it collapsed to h=0 -- on the
+      most reused band on the site, 30+ instances.
+   2. page-hero-split's right column was a .bp-panel with no ratio: a border
+      drawn around nothing, measured 50px. That one is now a .bp-media group
+      like every other, so only the media-text figure needs a rule.
+
+   `:empty` is exactly the right selector: it matches while the slot holds
+   nothing and STOPS matching the moment core puts an <img> in it, so a real
+   image is never constrained by a placeholder ratio.
+   -------------------------------------------------------------------------- */
+
+.wp-block-media-text.bp-split > .wp-block-media-text__media:empty {
+	aspect-ratio: 3 / 2;
+	background-color: var(--wp--custom--color--bg-soft);
+	border: 1px solid var(--wp--custom--color--border);
+	border-radius: var(--wp--custom--radius--lg);
+}
+
+/* 15.1  The team card's role line -- main.css:784. The team card is heading +
+   role + portrait; the role is the one treatment the card vocabulary did not
+   carry. Shipped here so the team band, wherever it is built, has it. */
+.card__role {
+	font-weight: 600;
+	color: var(--wp--custom--color--accent);
+}
+
+.has-forest-900-background-color .bp-card-light .card__role {
+	color: var(--wp--custom--color--accent);
+}
+
+/* --------------------------------------------------------------------------
+  16  Icons -- 180 of them, in <main>, across the seven measured documents
+
+   MEASURED BEFORE: the prototype renders 180 inline <svg> in <main> across
+   home/sil/faq/careers/locations/about/our-team; the build rendered 0, and
+   substituted nothing for them -- no ::after content, no mask-image, no
+   background-image. Two hosts carried a lookalike text glyph instead: the
+   card tile a "diamond" and the accordion toggle a "+".
+
+   HOW THEY ARE AUTHORED, AND WHY
+
+   The choice is between three things, and it is a client-safety decision
+   before it is a fidelity one.
+
+   1. Inline SVG inside a block's innerHTML (what the prototype does). Core has
+      no SVG block; it would have to ride inside core/html or inside a
+      paragraph's rich text. In a paragraph it is one Backspace away from
+      being gone, with no undo path once the page is saved, and Gutenberg
+      strips markup it does not recognise from rich text on re-save without
+      raising anything. In core/html it survives, but then every icon is a
+      raw-HTML block in a pattern the client is meant to edit, and 180 of them
+      are 180 chances to paste something else into one.
+   2. An icon font. Rejected outright: a glyph is text to a screen reader and
+      to a text-only renderer, it fails when the font 404s, and the brief
+      forbids a lookalike glyph -- which is what a font is.
+   3. A CSS mask painted onto a pseudo-element of an element that already
+      exists in the pattern. The geometry lives in the stylesheet, so no
+      edit in the editor can delete it and no round-trip can invalidate a
+      block over it. The pattern keeps ordinary editable text. Which glyph
+      appears is a class on the host block -- `bp-icon--map-pin` -- so it is
+      still a per-instance decision a composer can make, and the class is
+      carried on a block that already ships `lock:{move,remove}`.
+
+   (3) is what this builds. Its cost is stated rather than hidden: a masked
+   pseudo-element is NOT in the accessibility tree and cannot be given a name.
+   That is correct here and only here -- every one of the 180 in the prototype
+   carries `aria-hidden="true" focusable="false"`, so all 180 are decorative by
+   the design's own declaration, and each sits beside a visible text label. An
+   icon that ever has to CARRY meaning must not use this mechanism.
+
+   The geometry is never retyped. `qa/bands-icon-css-gen.py` lifts it verbatim
+   out of design/*.html and writes the block between the BEGIN/END markers
+   below; `--check` re-derives it and fails if the two have drifted. 36
+   geometries cover all 602 icons in the prototype's <main> site-wide.
+   -------------------------------------------------------------------------- */
+
+/* The painter. `--bp-icon` is the mask; `--bp-icon-size` is the box, measured
+   per host below. currentColor by default, so an icon on a dark band inverts
+   with its text and there is no second thing to remember -- the hosts whose
+   icon is measurably NOT its text colour say so individually. */
+.bp-icon::before,
+.bp-icon-after::after {
+	content: "";
+	display: inline-block;
+	flex: 0 0 auto;
+	width: var(--bp-icon-size, 20px);
+	height: var(--bp-icon-size, 20px);
+	background-color: var(--bp-icon-color, currentColor);
+	-webkit-mask-image: var(--bp-icon);
+	mask-image: var(--bp-icon);
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	mask-position: center;
+	-webkit-mask-size: contain;
+	mask-size: contain;
+}
+
+/* A host that paints an icon beside text needs to be a flex line, or the
+   pseudo-element sits on the text baseline and the gap is a guess. 8px is the
+   prototype's own gap on .link-arrow, .card__spec and .btn. */
+.bp-icon,
+.bp-icon-after {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--bp-icon-gap, 8px);
+}
+
+/* core puts a block's custom className on the BUTTON WRAPPER, not on the <a>
+   that is actually the visible box, so the flex line and the pseudo-element
+   both have to be re-aimed one level down. */
+.wp-block-button.bp-icon-after > .wp-block-button__link {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--bp-icon-gap, 8px);
+}
+
+.wp-block-button.bp-icon-after::after {
+	content: none;
+}
+
+.wp-block-button.bp-icon-after > .wp-block-button__link::after {
+	content: "";
+	display: inline-block;
+	flex: 0 0 auto;
+	width: var(--bp-icon-size, 20px);
+	height: var(--bp-icon-size, 20px);
+	background-color: var(--bp-icon-color, currentColor);
+	-webkit-mask-image: var(--bp-icon);
+	mask-image: var(--bp-icon);
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	mask-position: center;
+	-webkit-mask-size: contain;
+	mask-size: contain;
+}
+
+/* 16.1  The hosts whose icon is the same on every instance, wired here rather
+   than in a pattern. These reach a PUBLISHED page without rebuilding it,
+   because nothing in the stored markup changes. */
+
+/* The media frame's icon -- 28 of the 180, one geometry, above the label.
+   Prototype: 20x20 sage-600 in a 28x28 host, sage-300 on the dark frame.
+   .bp-media is a centred flex row, so the icon and the label stack. */
+.bp-media {
+	flex-direction: column;
+	gap: var(--wp--preset--spacing--20);
+}
+
+.bp-media:not(:has(img[src]))::before {
+	content: "";
+	display: block;
+	flex: 0 0 auto;
+	width: 20px;
+	height: 20px;
+	background-color: var(--wp--preset--color--sage-600);
+	-webkit-mask-image: var(--bp-icon);
+	mask-image: var(--bp-icon);
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	mask-position: center;
+	-webkit-mask-size: contain;
+	mask-size: contain;
+	--bp-icon: var(--bp-icon-image);
+}
+
+.bp-media--dark:not(:has(img[src]))::before,
+.bp-media--accent:not(:has(img[src]))::before {
+	background-color: var(--wp--preset--color--sage-300);
+}
+
+/* The accordion toggle -- 40 of the 180, and the largest single group.
+   core/accordion ships the character "+" in the toggle's innerHTML. The
+   character is STORED markup: removing it is a block-validity change on every
+   accordion on the site, so it stays and is covered instead. `font-size: 0`
+   collapses the glyph without removing it from the box, and the mask paints
+   the prototype's own two-stroke plus over the same 24px square.
+   Prototype: 24x24, forest-700, and it rotates 45deg when the item opens. */
+.wp-block-accordion-heading__toggle-icon {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 24px;
+	height: 24px;
+	font-size: 0;
+	color: transparent;
+	transition: transform 0.2s ease;
+}
+
+.wp-block-accordion-heading__toggle-icon::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background-color: var(--wp--preset--color--forest-700);
+	-webkit-mask-image: var(--bp-icon-plus);
+	mask-image: var(--bp-icon-plus);
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	mask-position: center;
+	-webkit-mask-size: contain;
+	mask-size: contain;
+}
+
+.wp-block-accordion-item.is-open .wp-block-accordion-heading__toggle-icon,
+[aria-expanded="true"] .wp-block-accordion-heading__toggle-icon {
+	transform: rotate(45deg);
+}
+
+/* 16.2  Per-host sizes and tones, each measured on the prototype at 1440. */
+
+/* The tile hosts. The tile itself already exists; only the glyph is new. */
+.icon-tile.bp-icon { --bp-icon-size: 24px; }
+.icon-tile--sm.bp-icon { --bp-icon-size: 20px; }   /* the 40x40 rung: a 20px glyph, measured */
+.benefit__icon.bp-icon { --bp-icon-size: 20px; }
+
+/* A tile holds ONLY the icon, so the 8px inline gap is wrong there and the
+   tile's own centring does the work. */
+.icon-tile.bp-icon,
+.benefit__icon.bp-icon {
+	--bp-icon-gap: 0px;
+	justify-content: center;
+}
+
+/* Buttons. Prototype .btn__icon: 20x20, 8px gap, the button's own ink. */
+.wp-block-button.bp-icon-after { --bp-icon-size: 20px; }
+
+/* The property card's region and access lines -- main.css .card__meta and
+   .card__spec. Both are muted text with a sage-600 icon: the icon is NOT the
+   text colour here, measured 18x18 rgb(74,115,85) against text rgb(85,96,90). */
+.card__specs.bp-icon,
+.card__meta.bp-icon {
+	--bp-icon-size: 18px;
+	--bp-icon-color: var(--wp--preset--color--sage-600);
+}
+
+/* card__meta's gap is 12px, not 8 -- measured. */
+.card__meta.bp-icon { --bp-icon-gap: 12px; }
+
+/* The trust strip's item, 24px -- measured 24.00x24.00 in a 12px gap row. */
+.trust-strip__item.bp-icon {
+	--bp-icon-size: 24px;
+	--bp-icon-gap: 12px;
+	--bp-icon-color: var(--wp--preset--color--sage-600);
+	align-items: flex-start;
+}
+
+/* The hero's tick list. The prototype gives these three list items real icons
+   in place of the tick disc, at 20px sage-600 in a flex row with an 8px gap. */
+.tick-list li.bp-icon {
+	--bp-icon-size: 20px;
+	--bp-icon-color: var(--wp--preset--color--sage-600);
+	display: flex;
+}
+
+.tick-list li.bp-icon::marker { content: ""; }
+
+/* The disc rule at section 6 and the painter rule are the SAME specificity
+   (0,1,1) on the same pseudo-element, and "later wins" is not a safe thing to
+   lean on across 1500 lines. Measured before this rule existed: the icon
+   painted, but at the disc's 22px in the disc's sage-100 -- the mask was
+   right and every other property came from the rule above. So the four
+   properties the disc owns are restated here, at (0,2,1), where they cannot
+   be reordered out. */
+.tick-list li.bp-icon::before {
+	position: static;
+	border-radius: 0;
+	background-image: none;
+	width: var(--bp-icon-size, 20px);
+	height: var(--bp-icon-size, 20px);
+	background-color: var(--bp-icon-color, currentColor);
+}
+/* The trust strip's item is a two-column grid, not a flex line: the icon sits
+   beside a title AND a body line, so it has to span both rows. Doing it in the
+   grid means the pattern keeps its two plain paragraphs -- the alternative was
+   wrapping them in a third group, which would have shifted every
+   `core/paragraph#n` selector the page composer uses on this band. */
+.trust-strip__item.bp-icon {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	column-gap: var(--bp-icon-gap, 12px);
+	align-items: start;
+}
+
+.trust-strip__item.bp-icon::before {
+	grid-row: 1 / span 2;
+	margin-top: 0.15em;
+}
+
+/* The section head's CTA. The prototype renders this one as a link, not a
+   button, and its arrow measures 18x18 rather than the button's 20. The build
+   made it a button before this track existed; the size follows the prototype's
+   element rather than the build's. */
+.bp-head-split .wp-block-button.bp-icon-after {
+	--bp-icon-size: 18px;
+}
+
+/* The home hero's list. The prototype's is `ul.hero__trust` -- three items,
+   each with its own 20px icon and NO tick disc -- where the build reused the
+   tick list. `.bp-free` on that block has never had a CSS consumer; the icon
+   modifier is now what marks the disc-free variant, and it is stated on the
+   item rather than the list because the icon differs per item. */
+.tick-list li.bp-icon {
+	padding-left: 0;
+	gap: 8px;
+	align-items: center;
+}
+
+/* Careers' perk tile -- main.css:725. The 40x40 / 6px rung that section 6 took
+   out for having no consumer. It comes back with the band that needs it. */
+.icon-tile--sm {
+	width: 40px;
+	height: 40px;
+	border-radius: var(--wp--custom--radius--sm);
+}
+
+/* GENERATED by qa/bands-icon-css-gen.py -- do not hand-edit between the
+   BEGIN and END markers. Geometry is lifted verbatim from design/*.html;
+   `python3 qa/bands-icon-css-gen.py --check` fails if the two diverge.
+   36 geometries, 602 rendered uses in the prototype's <main>. */
+/* BEGIN bp-icon geometry */
+:root {
+	--bp-icon-accessibility: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Ccircle cx%3D%2212%22 cy%3D%224%22 r%3D%222%22%2F%3E%3Cpath d%3D%22M19 13v-2a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v2%22%2F%3E%3Cpath d%3D%22m9 9 1 11%22%2F%3E%3Cpath d%3D%22m15 9-1 11%22%2F%3E%3C%2Fsvg%3E");  /* 16 */
+	--bp-icon-alert-circle: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Ccircle cx%3D%2212%22 cy%3D%2212%22 r%3D%2210%22%2F%3E%3Cpath d%3D%22M12 8v4%22%2F%3E%3Cpath d%3D%22M12 16h.01%22%2F%3E%3C%2Fsvg%3E");  /* 55 */
+	--bp-icon-arrow-right: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22M5 12h14%22%2F%3E%3Cpath d%3D%22m12 5 7 7-7 7%22%2F%3E%3C%2Fsvg%3E");  /* 72 */
+	--bp-icon-bed: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22M2 4v16%22%2F%3E%3Cpath d%3D%22M2 8h18a2 2 0 0 1 2 2v10%22%2F%3E%3Cpath d%3D%22M2 17h20%22%2F%3E%3Cpath d%3D%22M6 8v9%22%2F%3E%3C%2Fsvg%3E");  /* 14 */
+	--bp-icon-book: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22M4 19.5A2.5 2.5 0 0 1 6.5 17H20%22%2F%3E%3Cpath d%3D%22M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z%22%2F%3E%3C%2Fsvg%3E");  /* 3 */
+	--bp-icon-briefcase: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Crect x%3D%222%22 y%3D%227%22 width%3D%2220%22 height%3D%2214%22 rx%3D%222%22%2F%3E%3Cpath d%3D%22M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16%22%2F%3E%3C%2Fsvg%3E");  /* 1 */
+	--bp-icon-calendar: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Crect x%3D%223%22 y%3D%224%22 width%3D%2218%22 height%3D%2218%22 rx%3D%222%22%2F%3E%3Cpath d%3D%22M16 2v4%22%2F%3E%3Cpath d%3D%22M8 2v4%22%2F%3E%3Cpath d%3D%22M3 10h18%22%2F%3E%3C%2Fsvg%3E");  /* 7 */
+	--bp-icon-car: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22M19 17h2l-1.4-5.6a2 2 0 0 0-1.9-1.4H6.3a2 2 0 0 0-1.9 1.4L3 17h2%22%2F%3E%3Ccircle cx%3D%227%22 cy%3D%2217%22 r%3D%222%22%2F%3E%3Ccircle cx%3D%2217%22 cy%3D%2217%22 r%3D%222%22%2F%3E%3Cpath d%3D%22M9 17h6%22%2F%3E%3C%2Fsvg%3E");  /* 11 */
+	--bp-icon-check: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpolyline points%3D%2220 6 9 17 4 12%22%2F%3E%3C%2Fsvg%3E");  /* 38 */
+	--bp-icon-check-circle: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22M22 11.08V12a10 10 0 1 1-5.93-9.14%22%2F%3E%3Cpolyline points%3D%2222 4 12 14.01 9 11.01%22%2F%3E%3C%2Fsvg%3E");  /* 8 */
+	--bp-icon-clock: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Ccircle cx%3D%2212%22 cy%3D%2212%22 r%3D%2210%22%2F%3E%3Cpolyline points%3D%2212 6 12 12 16 14%22%2F%3E%3C%2Fsvg%3E");  /* 23 */
+	--bp-icon-compass: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Ccircle cx%3D%2212%22 cy%3D%2212%22 r%3D%2210%22%2F%3E%3Cpolygon points%3D%2216.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76%22%2F%3E%3C%2Fsvg%3E");  /* 8 */
+	--bp-icon-download: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4%22%2F%3E%3Cpolyline points%3D%227 10 12 15 17 10%22%2F%3E%3Cpath d%3D%22M12 15V3%22%2F%3E%3C%2Fsvg%3E");  /* 5 */
+	--bp-icon-file-text: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z%22%2F%3E%3Cpolyline points%3D%2214 2 14 8 20 8%22%2F%3E%3C%2Fsvg%3E");  /* 4 */
+	--bp-icon-filter: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpolygon points%3D%2222 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3%22%2F%3E%3C%2Fsvg%3E");  /* 1 */
+	--bp-icon-handshake: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22m11 17 2 2a1 1 0 1 0 3-3%22%2F%3E%3Cpath d%3D%22m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4%22%2F%3E%3Cpath d%3D%22m21 3 1 11h-2%22%2F%3E%3Cpath d%3D%22M3 4h8%22%2F%3E%3Cpath d%3D%22M3 15h2l3.3 3.3a1 1 0 0 0 1.4-1.4L8 15%22%2F%3E%3C%2Fsvg%3E");  /* 3 */
+	--bp-icon-heart: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z%22%2F%3E%3C%2Fsvg%3E");  /* 15 */
+	--bp-icon-home: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z%22%2F%3E%3Cpolyline points%3D%229 22 9 12 15 12 15 22%22%2F%3E%3C%2Fsvg%3E");  /* 15 */
+	--bp-icon-image: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Crect x%3D%223%22 y%3D%223%22 width%3D%2218%22 height%3D%2218%22 rx%3D%222%22%2F%3E%3Ccircle cx%3D%229%22 cy%3D%229%22 r%3D%222%22%2F%3E%3Cpath d%3D%22m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21%22%2F%3E%3C%2Fsvg%3E");  /* 69 */
+	--bp-icon-info-circle: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Ccircle cx%3D%2212%22 cy%3D%2212%22 r%3D%2210%22%2F%3E%3Cpath d%3D%22M12 16v-4%22%2F%3E%3Cpath d%3D%22M12 8h.01%22%2F%3E%3C%2Fsvg%3E");  /* 6 */
+	--bp-icon-leaf: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z%22%2F%3E%3Cpath d%3D%22M2 21c0-3 1.85-5.36 5.08-6%22%2F%3E%3C%2Fsvg%3E");  /* 6 */
+	--bp-icon-list: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22M8 6h13%22%2F%3E%3Cpath d%3D%22M8 12h13%22%2F%3E%3Cpath d%3D%22M8 18h13%22%2F%3E%3Cpath d%3D%22M3 6h.01%22%2F%3E%3Cpath d%3D%22M3 12h.01%22%2F%3E%3Cpath d%3D%22M3 18h.01%22%2F%3E%3C%2Fsvg%3E");  /* 4 */
+	--bp-icon-mail: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Crect x%3D%222%22 y%3D%224%22 width%3D%2220%22 height%3D%2216%22 rx%3D%222%22%2F%3E%3Cpath d%3D%22m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7%22%2F%3E%3C%2Fsvg%3E");  /* 3 */
+	--bp-icon-map-pin: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z%22%2F%3E%3Ccircle cx%3D%2212%22 cy%3D%2210%22 r%3D%223%22%2F%3E%3C%2Fsvg%3E");  /* 50 */
+	--bp-icon-message: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z%22%2F%3E%3C%2Fsvg%3E");  /* 5 */
+	--bp-icon-phone: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z%22%2F%3E%3C%2Fsvg%3E");  /* 34 */
+	--bp-icon-plus: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22M12 5v14%22%2F%3E%3Cpath d%3D%22M5 12h14%22%2F%3E%3C%2Fsvg%3E");  /* 72 */
+	--bp-icon-search: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Ccircle cx%3D%2211%22 cy%3D%2211%22 r%3D%228%22%2F%3E%3Cpath d%3D%22m21 21-4.3-4.3%22%2F%3E%3C%2Fsvg%3E");  /* 6 */
+	--bp-icon-share: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Ccircle cx%3D%226%22 cy%3D%2219%22 r%3D%223%22%2F%3E%3Cpath d%3D%22M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15%22%2F%3E%3Ccircle cx%3D%2218%22 cy%3D%225%22 r%3D%223%22%2F%3E%3C%2Fsvg%3E");  /* 3 */
+	--bp-icon-shield: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z%22%2F%3E%3C%2Fsvg%3E");  /* 4 */
+	--bp-icon-sparkle: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22m12 3-1.9 5.8L4 10.7l6.1 1.9L12 18.4l1.9-5.8 6.1-1.9-6.1-1.9z%22%2F%3E%3C%2Fsvg%3E");  /* 10 */
+	--bp-icon-star: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpolygon points%3D%2212 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2%22%2F%3E%3C%2Fsvg%3E");  /* 2 */
+	--bp-icon-target: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Ccircle cx%3D%2212%22 cy%3D%2212%22 r%3D%2210%22%2F%3E%3Ccircle cx%3D%2212%22 cy%3D%2212%22 r%3D%226%22%2F%3E%3Ccircle cx%3D%2212%22 cy%3D%2212%22 r%3D%222%22%2F%3E%3C%2Fsvg%3E");  /* 5 */
+	--bp-icon-upload: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4%22%2F%3E%3Cpolyline points%3D%2217 8 12 3 7 8%22%2F%3E%3Cpath d%3D%22M12 3v13%22%2F%3E%3C%2Fsvg%3E");  /* 2 */
+	--bp-icon-user: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2%22%2F%3E%3Ccircle cx%3D%2212%22 cy%3D%227%22 r%3D%224%22%2F%3E%3C%2Fsvg%3E");  /* 6 */
+	--bp-icon-users: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22black%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpath d%3D%22M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2%22%2F%3E%3Ccircle cx%3D%229%22 cy%3D%227%22 r%3D%224%22%2F%3E%3Cpath d%3D%22M22 21v-2a4 4 0 0 0-3-3.87%22%2F%3E%3Cpath d%3D%22M16 3.13a4 4 0 0 1 0 7.75%22%2F%3E%3C%2Fsvg%3E");  /* 16 */
+}
+
+.bp-icon--accessibility { --bp-icon: var(--bp-icon-accessibility); }
+.bp-icon--alert-circle { --bp-icon: var(--bp-icon-alert-circle); }
+.bp-icon--arrow-right { --bp-icon: var(--bp-icon-arrow-right); }
+.bp-icon--bed { --bp-icon: var(--bp-icon-bed); }
+.bp-icon--book { --bp-icon: var(--bp-icon-book); }
+.bp-icon--briefcase { --bp-icon: var(--bp-icon-briefcase); }
+.bp-icon--calendar { --bp-icon: var(--bp-icon-calendar); }
+.bp-icon--car { --bp-icon: var(--bp-icon-car); }
+.bp-icon--check { --bp-icon: var(--bp-icon-check); }
+.bp-icon--check-circle { --bp-icon: var(--bp-icon-check-circle); }
+.bp-icon--clock { --bp-icon: var(--bp-icon-clock); }
+.bp-icon--compass { --bp-icon: var(--bp-icon-compass); }
+.bp-icon--download { --bp-icon: var(--bp-icon-download); }
+.bp-icon--file-text { --bp-icon: var(--bp-icon-file-text); }
+.bp-icon--filter { --bp-icon: var(--bp-icon-filter); }
+.bp-icon--handshake { --bp-icon: var(--bp-icon-handshake); }
+.bp-icon--heart { --bp-icon: var(--bp-icon-heart); }
+.bp-icon--home { --bp-icon: var(--bp-icon-home); }
+.bp-icon--image { --bp-icon: var(--bp-icon-image); }
+.bp-icon--info-circle { --bp-icon: var(--bp-icon-info-circle); }
+.bp-icon--leaf { --bp-icon: var(--bp-icon-leaf); }
+.bp-icon--list { --bp-icon: var(--bp-icon-list); }
+.bp-icon--mail { --bp-icon: var(--bp-icon-mail); }
+.bp-icon--map-pin { --bp-icon: var(--bp-icon-map-pin); }
+.bp-icon--message { --bp-icon: var(--bp-icon-message); }
+.bp-icon--phone { --bp-icon: var(--bp-icon-phone); }
+.bp-icon--plus { --bp-icon: var(--bp-icon-plus); }
+.bp-icon--search { --bp-icon: var(--bp-icon-search); }
+.bp-icon--share { --bp-icon: var(--bp-icon-share); }
+.bp-icon--shield { --bp-icon: var(--bp-icon-shield); }
+.bp-icon--sparkle { --bp-icon: var(--bp-icon-sparkle); }
+.bp-icon--star { --bp-icon: var(--bp-icon-star); }
+.bp-icon--target { --bp-icon: var(--bp-icon-target); }
+.bp-icon--upload { --bp-icon: var(--bp-icon-upload); }
+.bp-icon--user { --bp-icon: var(--bp-icon-user); }
+.bp-icon--users { --bp-icon: var(--bp-icon-users); }
+/* END bp-icon geometry */
+
+/* --------------------------------------------------------------------------
+   Home hero parity (pages.css .hero__trust / .hero__card), measured 1440/390.
+   trust list  proto: wrapped row, 16/32 gap, 1px top rule, 15px/600, outline icons
+               built: stacked tick list, 17px/400, sage tick discs
+   call card   proto: overlaps the media by 32px, inset 24px, radius 16, 1px border
+               built: sits 16px below, full width, radius 10
+   -------------------------------------------------------------------------- */
+.bp-hero-home .tick-list.bp-free {
+	display: flex; flex-wrap: wrap; gap: 16px 32px;
+	margin-top: 12px; padding-top: 24px; width: 100%;
+	border-top: 1px solid var(--wp--custom--color--border);
+}
+.bp-hero-home .tick-list.bp-free li {
+	display: inline-flex; align-items: center; gap: 8px; padding-left: 0; margin: 0;
+	font-size: var(--wp--preset--font-size--small); font-weight: 600; line-height: 1.7;
+	color: var(--wp--custom--color--text-body, #333d37);
+}
+.bp-hero-home .tick-list.bp-free li::before {
+	position: static; width: 20px; height: 20px; border-radius: 0;
+	background: var(--wp--preset--color--sage-600, #4a7355);
+	-webkit-mask: var(--bp-icon, var(--bp-icon-check-circle)) center / contain no-repeat;
+	mask: var(--bp-icon, var(--bp-icon-check-circle)) center / contain no-repeat;
+}
+.bp-hero-home .tick-list.bp-free li:nth-child(2)::before { -webkit-mask-image: var(--bp-icon, var(--bp-icon-users)); mask-image: var(--bp-icon, var(--bp-icon-users)); }
+.bp-hero-home .tick-list.bp-free li:nth-child(3)::before { -webkit-mask-image: var(--bp-icon, var(--bp-icon-heart)); mask-image: var(--bp-icon, var(--bp-icon-heart)); }
+
+.bp-hero-home .hero__card {
+	position: relative; z-index: 1;
+	margin: -32px 24px 0; gap: 16px;
+	padding: 16px 24px;
+	background: var(--wp--preset--color--white, #fff);
+	border: 1px solid var(--wp--custom--color--border);
+	border-radius: var(--wp--custom--radius--lg, 16px);
+	box-shadow: var(--wp--custom--shadow--lg, 0 12px 32px rgba(28,38,32,.1), 0 4px 8px rgba(28,38,32,.05));
+}
+.bp-hero-home .hero__card-text { font-size: var(--wp--preset--font-size--small); line-height: 1.5; }
+.bp-hero-home .hero__card-text strong { display: block; color: var(--wp--preset--color--ink-900, #1c2620); font-size: var(--wp--preset--font-size--medium); }
+.bp-hero-home .hero__card-text span, .bp-hero-home .hero__card-text a { color: var(--wp--custom--color--text-muted); text-decoration: none; }
+@media (max-width: 640px) { .bp-hero-home .hero__card { margin-inline: 12px; } }
+
+/* pages.css:204-208 -- .benefit is icon | (title, text) in a row, text 15px/1.6
+   muted. Built: the three blocks stacked, text at x=132 (proto 188), body colour.
+   The group has no role class, so it is recognised by its .benefit__icon child. */
+.wp-block-group:has(> .benefit__icon) {
+	display: grid;
+	grid-template-columns: 40px minmax(0, 1fr);
+	column-gap: 16px;
+	align-items: start;
+}
+.wp-block-group:has(> .benefit__icon) > * { grid-column: 2; margin-block-start: 0; }
+.wp-block-group:has(> .benefit__icon) > .benefit__icon { grid-column: 1; grid-row: 1 / span 3; }
+.wp-block-group:has(> .benefit__icon) > .benefit__title { margin-bottom: 2px; }
+.wp-block-group:has(> .benefit__icon) > .benefit__title ~ p:not(.benefit__title) {
+	line-height: 1.6;
+	color: var(--wp--custom--color--text-muted);
+}
+.has-forest-900-background-color .wp-block-group:has(> .benefit__icon) > .benefit__title ~ p {
+	color: var(--wp--custom--color--text-invert-muted);
+}
+
+/* main.css:644 label is 15px/1.45 forest-700; the pattern asks for x-small, which core prints !important. */
+p.bp-media__label.has-x-small-font-size { font-size: var(--wp--preset--font-size--small) !important; }
+
+
+/* ==========================================================================
+   G2  Global CTA / section-head parity (2026-09-28), traced to main.css
+   ========================================================================== */
+
+/* Dark CTA primary = .btn--on-dark (main.css:540): sand-50 fill, forest-900
+   text. The synced block (wp_block 16) and every copy of it carry
+   has-terracotta-600-background-color, whose preset rule is !important, so
+   the surface rule has to be too. Scoped to the dark CTA panel only. */
+.bp-cta.has-forest-900-background-color .wp-block-button:not(.is-style-outline):not(.is-style-ghost) > .wp-block-button__link {
+	background-color: var(--wp--custom--color--text-invert) !important;
+	color: var(--wp--preset--color--forest-900) !important;
+}
+.bp-cta.has-forest-900-background-color .wp-block-button:not(.is-style-outline):not(.is-style-ghost) > .wp-block-button__link:hover {
+	background-color: var(--wp--custom--color--surface) !important;
+}
+
+/* .cta__inner max-width: 56ch (main.css:1556). The text group ran the full
+   panel width: h2 1030px against 616px. */
+.bp-cta.has-forest-900-background-color > .wp-block-group:not(.cta__shape) {
+	position: relative;
+	z-index: 1;
+	max-width: 56ch;
+}
+
+/* Icons on the CTA outline buttons (main.css markup: btn__icon svg after the
+   label). The synced block and page copies dropped the bp-icon-after classes
+   the patterns carry, so the surface supplies the icon when the block does
+   not: phone on the dark CTA, download on the soft CTA. */
+.bp-cta .wp-block-button.is-style-outline:not(.bp-icon-after) > .wp-block-button__link {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--wp--preset--spacing--20);
+}
+.bp-cta .wp-block-button.is-style-outline:not(.bp-icon-after) > .wp-block-button__link::after {
+	content: "";
+	flex: 0 0 auto;
+	width: 20px;
+	height: 20px;
+	background-color: currentColor;
+	-webkit-mask: var(--bp-icon-phone) center / contain no-repeat;
+	mask: var(--bp-icon-phone) center / contain no-repeat;
+}
+.bp-cta.cta--soft .wp-block-button.is-style-outline:not(.bp-icon-after) > .wp-block-button__link::after {
+	-webkit-mask-image: var(--bp-icon-download);
+	mask-image: var(--bp-icon-download);
+}
+.bp-cta.cta--soft .wp-block-button.bp-icon-after.is-style-outline:not([class*="bp-icon--"]) { --bp-icon: var(--bp-icon-download); }
+
+/* Split section head text column: main.css:429 .section__head-text is a
+   56ch flex column with no indent. The block is a constrained group, so core
+   gave the lede content-size + auto margins (153px indent, 720px wide). */
+.bp-head-split > .wp-block-group:first-child {
+	max-width: 56ch;
+}
+.bp-head-split > .wp-block-group:first-child > * {
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+	max-width: none;
+}

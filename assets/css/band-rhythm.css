@@ -1,0 +1,3 @@
+/* Same-background neighbours: half the section padding on each side of the seam. */
+.bp-seam-top { padding-top: calc(var(--wp--preset--spacing--section-y) / 2) !important; }
+.bp-seam-bottom { padding-bottom: calc(var(--wp--preset--spacing--section-y) / 2) !important; }

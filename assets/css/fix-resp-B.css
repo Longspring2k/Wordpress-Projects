@@ -1,0 +1,54 @@
+/* fix-resp-B.css — Agent B: location pages + form pages (contact 312, refer 314, feedback 315) */
+
+/* B1. Region location pages: "Supports we deliver here" tick list (6 items)
+   sat full-width in 4 cols (4+2) and out of line with the heading.
+   Align to the heading's content width; 3 cols (3+3), 2 cols (<640), 1 col (<480). */
+.single-location .bp-loc-intro > ul.tick-list {
+	max-width: var(--wp--style--global--content-size, 700px) !important;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	column-gap: 1.5rem;
+}
+@media (max-width: 639px) {
+	.single-location .bp-loc-intro > ul.tick-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 479px) {
+	.single-location .bp-loc-intro > ul.tick-list { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* B1b. Suburb list: region pages have 5 suburbs → 4-col grid leaves 1 alone.
+   5 items: 5 cols from 1024, 3 cols (3+2) 640–1023, 2 cols below. */
+@media (min-width: 1024px) {
+	.single-location .bp-loc-sec--suburbs .chip-row:has(> .chip:nth-child(5):last-child) {
+		grid-template-columns: repeat(5, minmax(0, 1fr));
+	}
+}
+
+/* B2. Feedback type cards (3): cramped 159px cards in the form column at
+   900–1199, lone 3rd card at 641–899. Stack 1-col until 1200. */
+@media (min-width: 641px) and (max-width: 1199px) {
+	body.bp-page-feedback .field__options--grid-3 { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* B3. Contact cards (4) in bp-grid-4: 3 cols at 900–1199 left "Opening hours" alone.
+   2x2 until 1200 (4-up from 1200 as before). */
+@media (min-width: 900px) and (max-width: 1199px) {
+	body.bp-page-contact .wp-block-columns.bp-grid-4.bp-grid-4 > .wp-block-column {
+		flex-basis: calc((100% - 24px) / 2) !important;
+	}
+}
+
+/* B4. Refer stepper (7 dots in 500px column at 900–1199): 13px labels wrapped
+   to 2 lines. Show label for the current step only; others show number mark
+   (full labels return at ≥1200 where the column is wider). */
+@media (min-width: 900px) and (max-width: 1199px) {
+	body.bp-page-refer-a-participant .stepper__dot:not(.is-current) .stepper__dot-label {
+		position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+	}
+	body.bp-page-refer-a-participant .stepper__dot.is-current { flex: 1 0 auto; }
+	body.bp-page-refer-a-participant .stepper__dot.is-current .stepper__dot-label { white-space: nowrap; }
+}
+
+/* B1c. Suburb list <480: 5 items in 2 cols left 1 alone → 1 col (owner rule). */
+@media (max-width: 479px) {
+	.single-location .bp-loc-sec--suburbs .chip-row:has(> .chip:nth-child(5):last-child) { grid-template-columns: minmax(0, 1fr); }
+}

@@ -1,0 +1,75 @@
+/* fix-resp-A.css — responsive sprint agent A: SIL region / SIL home / SIL archive. */
+
+/* ---- 1. /sil-region/<term>/ (templates/taxonomy-sil_region.html) ---- */
+.bp-tpl--taxonomy-sil_region .bp-page-hero h1 { text-wrap: balance; }
+/* Hide the generic lede when the term has its own description. */
+.bp-tpl--taxonomy-sil_region .wp-block-term-description + .bp-region-lede { display: none; }
+.bp-tpl--taxonomy-sil_region .wp-block-term-description p { margin: 0; }
+
+/* ---- 3. SIL card grids (archive + region + /sil/): no lone card in last row ---- */
+/* 8 homes: 1 col < 600, 2 cols 600–1279, 4 cols >= 1280 (owner rule: 8 -> 2 or 4, not 3). */
+main.bp-tpl--archive-sil_property .wp-block-post-template.bp-cards.bp-grid-3 { display: grid; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 600px) {
+	main.bp-tpl--archive-sil_property .wp-block-post-template.bp-cards.bp-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1280px) {
+	main.bp-tpl--archive-sil_property:not(.bp-tpl--taxonomy-sil_region) .wp-block-post-template.bp-cards.bp-grid-3 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+	main.bp-tpl--taxonomy-sil_region .wp-block-post-template.bp-cards.bp-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+/* /sil/ "Homes with vacancies now": 3 cards -> 3 cols from 700px (was 2+1 at 768). */
+@media (min-width: 700px) {
+	body.bp-page-sil .wp-block-post-template.bp-grid-3.bp-query-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+	body.bp-page-sil .wp-block-post-template.bp-grid-3.bp-query-grid > li { width: auto; max-width: none; margin: 0; }
+}
+
+/* Mobile filter toggle (filters.js collapses the body < 768; without JS it stays open). */
+@media (max-width: 767px) {
+	.bp-tpl--archive-sil_property .filters__toggle { border-color: #D8CEBD; }
+	.bp-tpl--archive-sil_property .filters__toggle[aria-expanded="false"] ~ * { display: none; }
+}
+
+/* ---- 2. Single SIL property ---- */
+/* Overview cards: 4-up only when the main column is wide enough. */
+body.single-sil_property main.bp-tpl .spec-list dt { overflow-wrap: normal; word-break: normal; hyphens: none; letter-spacing: .04em; }
+@media (min-width: 900px) and (max-width: 1279px) {
+	body.single-sil_property main.bp-tpl .spec-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* Odd count in a 2-col grid (Jamison Court = 5): last card spans the row. */
+@media (max-width: 1279px) {
+	body.single-sil_property main.bp-tpl .spec-list > .spec-list__row:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+@media (min-width: 641px) and (max-width: 899px) {
+	/* stacked layout, full width main: 4-up, 5th spans */
+	body.single-sil_property main.bp-tpl .spec-list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+	body.single-sil_property main.bp-tpl .spec-list > .spec-list__row:nth-child(5):last-child { grid-column: 1 / -1; }
+	body.single-sil_property main.bp-tpl .spec-list > .spec-list__row:last-child:nth-child(3) { grid-column: auto; }
+}
+@media (min-width: 1280px) {
+	body.single-sil_property main.bp-tpl .spec-list > .spec-list__row:nth-child(5):last-child { grid-column: 1 / -1; }
+}
+
+/* Gallery: 5 thumbnails -> 5 across (>=641), 3+2 balanced below. */
+body.single-sil_property .bp-gallery__thumbs.bp-gallery__thumbs:has(> :nth-child(5):last-child) { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+@media (max-width: 640px) {
+	body.single-sil_property .bp-gallery__thumbs.bp-gallery__thumbs:has(> :nth-child(5):last-child) { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+	body.single-sil_property .bp-gallery__thumbs:has(> :nth-child(5):last-child) > :nth-child(-n+3) { grid-column: span 2; }
+	body.single-sil_property .bp-gallery__thumbs:has(> :nth-child(5):last-child) > :nth-child(n+4) { grid-column: span 3; aspect-ratio: 16 / 9; }
+}
+
+/* Enquiry form: no card-in-card. The .sidebar-card is the only card. */
+body.single-sil_property .sidebar-card .bp-slot:has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap,
+body.single-sil_property .sidebar-card .bp-slot:has(> .bp-form-wrap > .form[data-bp-form]) > :first-child {
+	float: none; width: auto; padding: 0; margin: 0; border: 0; border-radius: 0; background: transparent;
+}
+body.single-sil_property .sidebar-card .bp-slot:has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap ~ * { margin-left: 0 !important; }
+body.single-sil_property .sidebar-card .sidebar-card__title { text-wrap: balance; }
+@media (max-width: 480px) {
+	body.single-sil_property .sidebar-card { padding: 1.25rem; }
+}
+
+/* Tablet/mobile (stacked): jump link to the enquiry form in the hero. */
+.bp-tpl--single-sil_property .bp-enquire-jump { display: none; }
+@media (max-width: 899px) {
+	.bp-tpl--single-sil_property .bp-enquire-jump { display: flex; }
+	.bp-tpl--single-sil_property #enquire { scroll-margin-top: 96px; }
+}

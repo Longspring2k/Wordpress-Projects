@@ -1,0 +1,17 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "brightpath/form",
+	"title": "Bright Path form",
+	"category": "widgets",
+	"icon": "feedback",
+	"description": "One of the site forms, rendered from the field schema when the page is viewed.",
+	"keywords": [ "form", "contact", "enquiry" ],
+	"textdomain": "brightpath",
+	"attributes": {
+		"formSlug": { "type": "string", "default": "contact" }
+	},
+	"supports": { "html": false, "multiple": true, "reusable": false },
+	"editorScript": "brightpath-form-editor",
+	"render": "file:./render.php"
+}

@@ -1,0 +1,134 @@
+/* Responsive audit 2026-10-14. Alignment and tablet-grid fixes found by
+   sweeping every page at 390 / 768 / 1024 / 1440. */
+
+/* 1. Section heads (56ch measure) start on the content edge at every width.
+      WP's constrained layout centred the narrow head, so at tablet widths it
+      sat ~55px right of the grid below it. */
+.is-layout-constrained > .bp-head {
+	margin-left: max(0px, calc((100% - var(--wp--style--global--content-size, 1176px)) / 2)) !important;
+	margin-right: auto !important;
+}
+
+/* 2. Breadcrumbs line up with the hero heading instead of sitting one gutter in. */
+.wp-block-breadcrumbs { padding-inline: 0 !important; }
+
+/* 3. FAQ heads read left, on the same edge as the eyebrow and the accordion. */
+.wp-block-group:has(> .wp-block-accordion) > .wp-block-group:first-child,
+.wp-block-group:has(> .wp-block-accordion) > .wp-block-group:first-child > *,
+.wp-block-group:has(> .wp-block-accordion) > :is(h2, .wp-block-heading) {
+	text-align: left !important;
+	margin-left: 0 !important;
+}
+.wp-block-group:has(> .wp-block-accordion) > .wp-block-group:first-child,
+.wp-block-group:has(> .wp-block-accordion) > :is(h2, .wp-block-heading) {
+	margin-inline: auto !important;
+	max-width: 696px;
+	width: 100%;
+}
+.wp-block-group:has(> .wp-block-accordion) > .wp-block-accordion { max-width: 696px; }
+.wp-block-group:has(> .wp-block-accordion) > .wp-block-group:first-child .bp-eyebrow { justify-content: flex-start; }
+
+/* 4. Tablet: three-up card grids drop to two-up; at 768 three columns left
+      ~170px of text per card (wrapped eyebrows, orphaned "·" in meta rows). */
+@media (min-width: 600px) and (max-width: 1023px) {
+	.wp-block-columns.bp-grid-3.bp-grid-3 { flex-wrap: wrap !important; }
+	.wp-block-columns.bp-grid-3.bp-grid-3 > .wp-block-column {
+		flex-basis: calc((100% - var(--wp--preset--spacing--60, 2rem)) / 2) !important;
+		flex-grow: 0 !important;
+	}
+	.wp-block-post-template.columns-3.is-flex-container > li,
+	.wp-block-post-template.columns-3.is-flex-container.is-flex-container > li {
+		width: calc(50% - .625em) !important;
+	}
+	.wp-block-post-template-is-layout-grid.columns-3 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+
+/* 5. Cards in a row share one height, so their bottoms line up. */
+.wp-block-columns.bp-grid-3 > .wp-block-column { display: flex; flex-direction: column; }
+.wp-block-columns.bp-grid-3 > .wp-block-column > .bp-panel { flex: 1 1 auto; }
+
+/* 6. Mobile: a ghost (text) button is borderless, so its 24px side padding
+      read as an indent once the buttons stack. */
+@media (max-width: 781px) {
+	.wp-block-button.is-style-ghost > .wp-block-button__link { padding-inline: 0 !important; }
+}
+.bp-tpl--single-service .bp-measure:has(> .wp-block-accordion) > .bp-reveal:has(> h2) {
+	max-width: 696px !important;
+}
+
+/* 7. Careers perks: the 40px sage tile (fix-a.css A21) was drawn without its
+      icon. The prototype puts the same check mark in every perk tile. */
+body.bp-page-careers .bp-grid-3 .bp-panel:has(> .perk__title)::before {
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%231F4A3A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: 20px 20px;
+}
+
+/* 8. Query card grids (SIL homes, resources): every card fills its row and
+      the spec / meta row sits on the card's bottom edge, so the hairlines line
+      up across a row even when a title wraps to two lines. */
+.bp-query-grid > li { display: flex; }
+.bp-query-grid > li > .bp-panel { display: flex; flex-direction: column; width: 100%; }
+.bp-query-grid > li > .bp-panel > .card__specs { margin-top: auto !important; }
+
+/* 9. Tablet steps: at two-up the vertical rails ran from 01 into 03 and from
+      02 into nothing. The rail only means "next" in a single column. */
+@media (min-width: 600px) and (max-width: 899px) {
+	.bp-steps-row > .wp-block-column > .wp-block-group::before,
+	.bp-steps-row .bp-step-marker::after { display: none !important; }
+}
+@media (min-width: 600px) and (max-width: 1023px) {
+	/* Three-up at tablet leaves ~175px of text; 16px side padding fits
+	   "Wheelchair accessible" on one line so the spec rows match. */
+	.bp-sil-feature .bp-query-grid > li { min-width: 0; }
+	.bp-sil-feature .bp-query-grid > li > .bp-panel { padding-inline: 16px !important; }
+	.bp-sil-feature .bp-query-grid > li > .bp-panel > .bp-media { margin-inline: -16px !important; }
+}
+
+/* 10. Resources: the clock before "3 min read" (fix-c.css:197) used an SVG
+       data URI with unquoted attributes, which browsers reject, so only the
+       empty 20px slot showed. Same icon, valid markup. */
+.post-type-archive-resource li.wp-block-post .bp-card-meta__time::before {
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpolyline points='12 6 12 12 16 14'/%3E%3C/svg%3E") center / contain no-repeat;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpolyline points='12 6 12 12 16 14'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* 11. SIL homes filter bar on phones: label and toggle each stay on one line. */
+.post-type-archive-sil_property .filters__title,
+.post-type-archive-sil_property .filters__toggle { white-space: nowrap; flex-shrink: 0; }
+
+/* 12. Wide tables on phones scroll inside their figure; a soft edge shadow
+       shows there is more to the right (privacy: the "Why" column). */
+@media (max-width: 781px) {
+	figure.wp-block-table {
+		background:
+			linear-gradient(to right, var(--wp--preset--color--sand-50), transparent) left / 24px 100% no-repeat local,
+			linear-gradient(to left, var(--wp--preset--color--sand-50), transparent) right / 24px 100% no-repeat local,
+			radial-gradient(farthest-side at 0 50%, rgba(28, 38, 32, .14), transparent) left / 12px 100% no-repeat scroll,
+			radial-gradient(farthest-side at 100% 50%, rgba(28, 38, 32, .14), transparent) right / 12px 100% no-repeat scroll;
+		-webkit-overflow-scrolling: touch;
+	}
+}
+
+/* 13. Phones: term links (card eyebrows, region chips) get a 24px tap height. */
+@media (max-width: 781px) {
+	main .wp-block-post-terms a { display: inline-block; min-height: 24px; line-height: 24px; }
+}
+
+/* 14. Location stats on phones: one per line instead of a ragged 2 + 1 wrap. */
+@media (max-width: 599px) {
+	.bp-stats { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; }
+}
+
+/* 15. A real photo in a media frame drops the frame's hairline. The border
+       outlines the empty hatched placeholder; around a photo -- most visibly
+       on the dark careers hero -- it read as a thin white edge. */
+.bp-media:has(img[src]) {
+	border: 0 !important;
+	background-color: transparent !important;
+}
+/* The photo carries the frame's rounded corners itself, so no sliver of the
+   frame shows at the anti-aliased curve. */
+.bp-media:has(img[src]) > .wp-block-image,
+.bp-media:has(img[src]) img { border-radius: inherit; }

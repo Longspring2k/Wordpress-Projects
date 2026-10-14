@@ -1,0 +1,142 @@
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+
+<!-- wp:group {"tagName": "main", "align": "full", "className": "bp-tpl bp-tpl\u002d\u002darchive-resource", "style": {"spacing": {"blockGap": "0"}}, "layout": {"type": "constrained"}} -->
+<main class="wp-block-group alignfull bp-tpl bp-tpl--archive-resource"><!-- wp:group {"align": "full", "backgroundColor": "sand-100", "className": "bp-page-hero", "style": {"spacing": {"blockGap": "var:preset|spacing|40"}}, "layout": {"type": "constrained"}} -->
+<div class="wp-block-group alignfull bp-page-hero has-sand-100-background-color has-background"><!-- wp:breadcrumbs /-->
+
+<!-- wp:group {"className": "bp-reveal", "style": {"spacing": {"blockGap": "var:preset|spacing|40"}}, "layout": {"type": "constrained"}} -->
+<div class="wp-block-group bp-reveal"><!-- wp:paragraph {"className": "bp-eyebrow", "fontSize": "x-small"} -->
+<p class="bp-eyebrow has-x-small-font-size">Resources</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level": 1, "fontSize": "heading-1"} -->
+<h1 class="wp-block-heading has-heading-1-font-size">Plain-English guides to the NDIS.</h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className": "page-hero__lede", "fontSize": "large"} -->
+<p class="page-hero__lede has-large-font-size">Written by our coordinators for participants, families and the professionals who work alongside them. No jargon, no sales pitch.</p>
+<!-- /wp:paragraph -->
+
+</div>
+<!-- /wp:group -->
+
+</div>
+<!-- /wp:group -->
+
+<!-- wp:group {"align": "full", "backgroundColor": "white", "style": {"spacing": {"padding": {"top": "var:preset|spacing|section-y", "bottom": "var:preset|spacing|section-y"}, "blockGap": "var:preset|spacing|60"}}, "layout": {"type": "constrained"}} -->
+<div class="wp-block-group alignfull has-white-background-color has-background" style="padding-top:var(--wp--preset--spacing--section-y);padding-bottom:var(--wp--preset--spacing--section-y)"><!-- wp:html -->
+<nav class="resource-filters chip-row" aria-label="Resource categories" data-bp-chips><a class="chip" href="/resources/" data-term="all">All resources</a><a class="chip" href="/resource-category/guides/" data-term="guides">Guides</a><a class="chip" href="/resource-category/ndis-information/" data-term="ndis-information">NDIS Information</a><a class="chip" href="/resource-category/participant-resources/" data-term="participant-resources">Participant Resources</a><a class="chip" href="/resource-category/coordinator-resources/" data-term="coordinator-resources">Support Coordinator Resources</a><a class="chip" href="/resource-category/company-news/" data-term="company-news">Company News</a></nav>
+<!-- /wp:html -->
+
+<!-- wp:query {"queryId": 0, "query": {"perPage": 12, "pages": 0, "offset": 0, "postType": "resource", "order": "desc", "orderBy": "date", "inherit": true}, "layout": {"type": "default"}} -->
+<div class="wp-block-query"><!-- wp:post-template {"className": "bp-cards bp-grid-3", "style": {"spacing": {"blockGap": {"top": "var:preset|spacing|50", "left": "var:preset|spacing|50"}}}, "layout": {"type": "grid", "columnCount": 3}} -->
+<!-- wp:group {"backgroundColor": "white", "className": "bp-panel bp-reveal card\u002d\u002darticle", "style": {"spacing": {"blockGap": "var:preset|spacing|30"}}} -->
+<div class="wp-block-group bp-panel bp-reveal card--article has-white-background-color has-background"><!-- wp:group {"className":"bp-media bp-media\u002d\u002dratio-16-9 bp-media\u002d\u002dsquare-top","layout":{"type":"default"}} -->
+<div class="wp-block-group bp-media bp-media--ratio-16-9 bp-media--square-top"><!-- wp:paragraph {"metadata": {"bindings": {"content": {"source": "brightpath/derived", "args": {"key": "media_label"}}}}, "className": "bp-media__label", "fontSize": "small"} -->
+<p class="bp-media__label has-small-font-size"></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:post-featured-image /--></div>
+<!-- /wp:group -->
+
+<!-- wp:post-terms {"term":"resource_category","className":"card__category bp-eyebrow","fontSize":"x-small"} /-->
+
+<!-- wp:post-title {"level":3,"isLink":true,"className":"card__title","fontSize":"heading-3"} /-->
+
+<!-- wp:post-excerpt {"excerptLength":24,"className":"card__text","showMoreOnNewLine":false,"fontSize":"small"} /-->
+
+<!-- wp:group {"className":"card__meta card__foot bp-card-meta","style":{"spacing":{"blockGap":"12px"}},"layout":{"type":"flex","flexWrap":"wrap","verticalAlignment":"center"}} -->
+<div class="wp-block-group card__meta card__foot bp-card-meta"><!-- wp:paragraph {"metadata": {"bindings": {"content": {"source": "brightpath/derived", "args": {"key": "read_time"}}}}, "className": "bp-card-meta__time"} -->
+<p class="bp-card-meta__time"></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:post-date {"format":"j F Y","className":"bp-card-meta__date"} /--></div>
+<!-- /wp:group -->
+
+</div>
+<!-- /wp:group -->
+
+<!-- /wp:post-template -->
+
+<!-- wp:query-no-results -->
+<!-- wp:group {"className": "empty-state", "style": {"spacing": {"blockGap": "var:preset|spacing|40"}}, "layout": {"type": "constrained"}} -->
+<div class="wp-block-group empty-state"><!-- wp:heading {"fontSize": "heading-3", "className": "empty-state__title"} -->
+<h2 class="wp-block-heading empty-state__title has-heading-3-font-size">Nothing in that category yet</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className": "empty-state__text"} -->
+<p class="empty-state__text">We publish two or three pieces a month. Try another category, or get in touch if there is something you would like us to write about.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:buttons {"layout": {"type": "flex", "flexWrap": "wrap"}, "style": {"spacing": {"blockGap": "var:preset|spacing|30"}}} -->
+<div class="wp-block-buttons">
+<!-- wp:button {"className": "is-style-outline"} -->
+<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button" href="/contact/">Suggest a topic</a></div>
+<!-- /wp:button -->
+</div>
+<!-- /wp:buttons -->
+
+</div>
+<!-- /wp:group -->
+
+<!-- /wp:query-no-results -->
+
+<!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"space-between"}} -->
+<!-- wp:query-pagination-previous /-->
+<!-- wp:query-pagination-numbers /-->
+<!-- wp:query-pagination-next /-->
+<!-- /wp:query-pagination --></div>
+<!-- /wp:query -->
+
+</div>
+<!-- /wp:group -->
+
+<!-- wp:group {"align": "full", "backgroundColor": "white", "style": {"spacing": {"padding": {"top": "var:preset|spacing|section-y", "bottom": "var:preset|spacing|section-y"}, "blockGap": "var:preset|spacing|60"}}, "layout": {"type": "constrained"}} -->
+<div class="wp-block-group alignfull has-white-background-color has-background" style="padding-top:var(--wp--preset--spacing--section-y);padding-bottom:var(--wp--preset--spacing--section-y)"><!-- wp:group {"backgroundColor": "sage-100", "className": "bp-panel bp-cta cta\u002d\u002dsoft bp-reveal"} -->
+<div class="wp-block-group bp-panel bp-cta cta--soft bp-reveal has-sage-100-background-color has-background"><!-- wp:group {"className":"cta__shape"} -->
+<div class="wp-block-group cta__shape"></div>
+<!-- /wp:group -->
+
+<!-- wp:columns {"className": "bp-split-cols", "style": {"spacing": {"blockGap": {"left": "var:preset|spacing|70", "top": "var:preset|spacing|50"}}}} -->
+<div class="wp-block-columns bp-split-cols"><!-- wp:column {"verticalAlignment":"center"} -->
+<div class="wp-block-column is-vertically-aligned-center"><!-- wp:group {"style": {"spacing": {"blockGap": "var:preset|spacing|40"}}, "layout": {"type": "constrained"}} -->
+<div class="wp-block-group"><!-- wp:heading -->
+<h2 class="wp-block-heading">Looking for the right support for a participant?</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Support coordinators and plan managers can refer in a few minutes. We confirm capacity, suitability and an indicative start date within two business days.</p>
+<!-- /wp:paragraph -->
+
+</div>
+<!-- /wp:group -->
+
+</div>
+<!-- /wp:column -->
+<!-- wp:column {"verticalAlignment":"center"} -->
+<div class="wp-block-column is-vertically-aligned-center"><!-- wp:buttons {"layout": {"type": "flex", "flexWrap": "wrap"}, "style": {"spacing": {"blockGap": "var:preset|spacing|30"}}} -->
+<div class="wp-block-buttons">
+<!-- wp:button {"className": "bp-btn\u002d\u002dlg", "backgroundColor": "terracotta-600", "textColor": "sand-50"} -->
+<div class="wp-block-button bp-btn--lg"><a class="wp-block-button__link has-sand-50-color has-text-color has-terracotta-600-background-color has-background wp-element-button" href="/refer-a-participant/">Refer a participant</a></div>
+<!-- /wp:button -->
+<!-- wp:button {"className": "is-style-outline bp-btn\u002d\u002dlg bp-icon-after bp-icon\u002d\u002ddownload"} -->
+<div class="wp-block-button is-style-outline bp-btn--lg bp-icon-after bp-icon--download"><a class="wp-block-button__link wp-element-button" href="/contact/">Download service guide</a></div>
+<!-- /wp:button -->
+</div>
+<!-- /wp:buttons -->
+
+</div>
+<!-- /wp:column -->
+</div>
+<!-- /wp:columns -->
+
+</div>
+<!-- /wp:group -->
+
+</div>
+<!-- /wp:group -->
+
+<!-- wp:block {"ref":16} /--></main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->

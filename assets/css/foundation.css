@@ -1,0 +1,1194 @@
+/* ==========================================================================
+   Bright Path — foundation layer
+
+   OWNER: Main only. Gutter, stacking order, footer geometry, nav breakpoint, decorative shape colours.
+
+   One shard of what used to be a single style.css. The split exists so that
+   parallel work cannot collide: `.design-core/` is not under version control,
+   so two agents editing one file means one of them is lost, not merged.
+   Do not move rules between shards without saying so.
+   ========================================================================== */
+
+/* ==========================================================================
+   Bright Path theme stylesheet
+
+   Deliberately small. theme.json owns colour, type, spacing and layout.
+   main.css from the prototype is NOT ported here — it carries 63 dead class
+   names, the dead tabs/toast/modal code, and a duplicate of every token
+   theme.json now owns. That selective port is a later plan.
+
+   Contents
+     1  Gutter step-down (the two rungs theme.json cannot express)
+     2  Stacking order tokens
+     3  Footer middle rung
+     4  core/navigation breakpoint override
+     5  Decorative shape colours (color-mix refactor)
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   1  Gutter step-down
+
+   theme.json root padding takes ONE value and cannot express a media query,
+   so 2rem is the base and these two queries step it down.
+
+   Selector is `body` because that is what this install actually emits. Read
+   back from WP_Theme_JSON::get_stylesheet() on WordPress 7.1.1:
+
+     body{--wp--style--root--padding-top: 0;
+          --wp--style--root--padding-right: 2rem;
+          --wp--style--root--padding-bottom: 0;
+          --wp--style--root--padding-left: 2rem;}
+
+   Both rules are specificity (0,0,1), so ONLY source order decides. This
+   stylesheet declares 'global-styles' as a dependency in functions.php so it
+   always prints after. Do not drop that dependency.
+
+   Contract 3: three rungs, boundaries 640/641 and 899/900. There is NO 768px
+   gutter rung -- 768 is the utility-bar message breakpoint and nothing else.
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 899px) {
+	body {
+		--wp--style--root--padding-left: 1.5rem;
+		--wp--style--root--padding-right: 1.5rem;
+	}
+}
+
+@media (max-width: 640px) {
+	body {
+		--wp--style--root--padding-left: 1.25rem;
+		--wp--style--root--padding-right: 1.25rem;
+	}
+}
+
+
+/* --------------------------------------------------------------------------
+   2  Stacking order
+
+   These map to no editor control, so they are not settings.custom -- putting
+   them there would imply a control that will never exist.
+
+   NOTE: WordPress's admin bar is z-index 99999. --z-skip is the top of THIS
+   theme's stack, not the top of the page's stack on the built site.
+   -------------------------------------------------------------------------- */
+
+:root {
+	--z-base: 1;
+	--z-dropdown: 100;
+	--z-header: 200;
+	--z-mobile-nav: 300;
+	--z-modal: 400;
+	--z-toast: 500;
+	--z-skip: 600;
+}
+
+
+/* --------------------------------------------------------------------------
+   3  Footer middle rung
+
+   core/columns only knows "stack below 782px". The design's footer is
+   1 column below 641, 2 columns from 641 to 899, and 4 columns from 900.
+   This query supplies the middle rung core cannot express.
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 641px) and (max-width: 899px) {
+	.wp-block-columns.brightpath-footer__columns {
+		flex-wrap: wrap !important;
+	}
+
+	.wp-block-columns.brightpath-footer__columns > .wp-block-column {
+		/* Two columns share one 48px gap, so each gives up half of it.
+		   Do NOT compute this from --wp--style--block-gap: on this element it
+		   resolves to 24px while the rendered column-gap is 48px, which
+		   subtracts 12px instead of 24px, overflows by 8px and wraps to four
+		   rows. That shipped once and measured as four rows at 641-899. */
+		flex-basis: calc(50% - 24px) !important;
+		flex-grow: 0;
+	}
+}
+
+@media (max-width: 640px) {
+	.wp-block-columns.brightpath-footer__columns > .wp-block-column {
+		flex-basis: 100% !important;
+	}
+}
+
+
+
+/* --------------------------------------------------------------------------
+   3b  Footer column geometry at >=900px
+
+   Prototype source: .footer__grid { gap: var(--space-8) }  -> 48px
+                     grid-template-columns: 1.6fr 1fr 1fr 1.3fr
+   Measured on the prototype at 1440: 336.969 / 210.609 / 210.625 / 273.797,
+   summing to 1032 inside a 1176 content box -- exactly three 48px gaps.
+   Ratios: 1.6/4.9, 1/4.9, 1/4.9, 1.3/4.9.
+
+   core/columns writes a plain percentage flex-basis, which ignores the gaps and
+   renders every column proportionally narrow. Take the gaps out first.
+   -------------------------------------------------------------------------- */
+@media (min-width: 900px) {
+	.wp-block-columns.brightpath-footer__columns {
+		column-gap: 48px;
+		flex-wrap: nowrap;
+	}
+
+	.wp-block-columns.brightpath-footer__columns > .wp-block-column {
+		flex-grow: 0;
+	}
+
+	.brightpath-footer__columns > .wp-block-column:nth-child(1) {
+		flex-basis: calc((100% - 144px) * 1.6 / 4.9) !important;
+	}
+
+	.brightpath-footer__columns > .wp-block-column:nth-child(2),
+	.brightpath-footer__columns > .wp-block-column:nth-child(3) {
+		flex-basis: calc((100% - 144px) * 1 / 4.9) !important;
+	}
+
+	.brightpath-footer__columns > .wp-block-column:nth-child(4) {
+		flex-basis: calc((100% - 144px) * 1.3 / 4.9) !important;
+	}
+}
+
+@media (min-width: 641px) and (max-width: 899px) {
+	.wp-block-columns.brightpath-footer__columns {
+		column-gap: 48px;
+		row-gap: 48px;
+	}
+}
+
+/* --------------------------------------------------------------------------
+   4  core/navigation breakpoint override
+
+   core/navigation's own overlay breakpoint is 600px. The design swaps the nav
+   at 1200px, because eight nav items plus phone and CTA need about 1356px.
+
+   main.js hardcodes the same value as DESKTOP_MQ = '(min-width: 75rem)'
+   (75rem = 1200px). Moving this number without moving that one breaks the nav
+   silently, in the direction where neither nav is visible.
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 1199px) {
+	.wp-block-navigation__responsive-container-open:not(.always-shown) {
+		display: flex;
+	}
+
+	.wp-block-navigation__responsive-container:not(.hidden-by-default):not(.is-menu-open) {
+		display: none;
+	}
+}
+
+@media (min-width: 1200px) {
+	.wp-block-navigation__responsive-container-open:not(.always-shown) {
+		display: none;
+	}
+
+	.wp-block-navigation__responsive-container:not(.hidden-by-default):not(.is-menu-open) {
+		display: block;
+		position: relative;
+		width: 100%;
+		z-index: auto;
+		background-color: inherit;
+	}
+}
+
+
+/* --------------------------------------------------------------------------
+   5  Decorative shape colours
+
+   Replaces the five --rgb-* channel triplets, which no theme.json slot
+   accepts. No --rgb-* token survives anywhere in this theme.
+
+   DISCREPANCY FLAGGED TO MAIN -- read before changing these.
+   Contract 4 writes the replacement as
+     color-mix(in srgb, var(--wp--preset--color--forest-700) 32%, transparent)
+   but the call-sites it is describing do not use forest. Measured from
+   design/assets/css/main.css:
+     line  339  .swash::after            rgba(var(--rgb-terracotta), 0.32)
+     line 1571  .cta--soft .cta__shape   rgba(var(--rgb-terracotta), 0.3)
+                                         rgba(var(--rgb-sage), 0.2)
+   and --rgb-terracotta is 168, 80, 47 = terracotta-600 (#A8502F),
+       --rgb-sage       is  74, 115, 85 = sage-600       (#4A7355).
+   Using forest-700 would change the rendered colour of all three. The
+   percentages below are the contract's; the hues are the ones the prototype
+   actually paints. Main to confirm.
+
+   .modal__backdrop is NOT ported -- dead per contract 11.1.
+   The base .cta__shape (sage 0.55 / terracotta 0.22) still uses --rgb-* in
+   the prototype and is out of scope for this plan; it belongs to the later
+   selective main.css port.
+   -------------------------------------------------------------------------- */
+
+.swash::after {
+	background-color: color-mix(in srgb, var(--wp--preset--color--terracotta-600) 32%, transparent);
+}
+
+.cta--soft .cta__shape {
+	background: radial-gradient(
+		circle at 30% 30%,
+		color-mix(in srgb, var(--wp--preset--color--terracotta-600) 30%, transparent),
+		color-mix(in srgb, var(--wp--preset--color--sage-600) 20%, transparent)
+	);
+}
+
+/* --------------------------------------------------------------------------
+   6  Links on dark surfaces
+
+   theme.json `elements.link.color.text` is forest-700, which is correct on the
+   sand and white surfaces and close to invisible on forest-900: measured
+   rgb(31,74,58) on rgb(15,42,33) is roughly 1.3:1. It reached the utility bar
+   and the breadcrumbs, which sit on the dark band on most interior pages.
+
+   The prototype's own answer, main.css:564 and :580-581:
+       .on-dark .link       { color: var(--color-terracotta-100); }
+       .on-dark .link-arrow { color: var(--color-text-invert); }
+
+   Keyed off `has-forest-900-background-color`, the class core prints for the
+   only dark background in this palette, so a band becomes dark-aware by
+   choosing the dark background rather than by carrying an extra class. This
+   lives in the foundation shard because its first victims are the header and
+   footer template parts, which Main owns.
+   -------------------------------------------------------------------------- */
+
+.has-forest-900-background-color a:where(:not(.wp-element-button)),
+.has-forest-900-background-color a:where(:not(.wp-element-button)):visited {
+	color: var(--wp--preset--color--terracotta-100);
+}
+
+.has-forest-900-background-color a:where(:not(.wp-element-button)):hover,
+.has-forest-900-background-color a:where(:not(.wp-element-button)):focus {
+	color: var(--wp--preset--color--sand-50);
+}
+
+/* The focus ring inverts too -- forest-700 on forest-900 is the same problem
+   the ring is meant to solve. */
+.has-forest-900-background-color :focus-visible {
+	outline-color: var(--wp--custom--color--focus-invert);
+}
+
+/* --------------------------------------------------------------------------
+   7  Header chrome — sticky, and the two heights
+
+   Measured against the prototype at 1440, like for like:
+       utility bar   prototype 60px   built 38.1px
+       header row    prototype 73px   built 89.3px
+       total chrome  prototype 133px  built 151px
+   Two errors in opposite directions, which is why the total looked like one
+   small discrepancy. The prototype's own rules are main.css:855 and :877.
+
+   The header is `position: sticky` on the prototype and was `static` here —
+   design-QA measured ZERO fixed or sticky elements on the built site at every
+   width. That is the defect; the heights are the detail.
+   -------------------------------------------------------------------------- */
+
+.brightpath-utility-bar {
+	min-height: 60px;
+	display: flex;
+	align-items: center;
+}
+
+/*
+ * The sticky element must be the one whose CONTAINING BLOCK is the page.
+ *
+ * `position: sticky` is confined to its nearest ancestor's box. The row sat
+ * inside two 157px wrappers, so it stuck for 157px and then left with them —
+ * measured top -1416 after scrolling to 1500, against the prototype's 0. The
+ * declaration was `sticky` the whole time, which is why every static check
+ * passed. The prototype's `.site-header` is a direct child of `body`; ours is
+ * two groups deep and cannot be moved without changing the part's markup.
+ *
+ * So the template-part wrapper sticks instead, pulled up by the utility bar's
+ * own height: the bar scrolls out of view and the 73px row pins at 0, which is
+ * the prototype's behaviour with our DOM. Measure this by SCROLLING; reading
+ * `position` back proves nothing.
+ */
+header.wp-block-template-part {
+	position: sticky;
+	top: calc(-1 * var(--wp--custom--utility-bar-height));
+	z-index: var(--z-header);
+}
+
+/*
+ * The row's background is deliberately NOT a `backgroundColor` block attribute.
+ *
+ * It was `sand-50`, which makes core print `.has-sand-50-background-color` --
+ * and core declares every preset background class `!important`. The translucent
+ * color-mix below lost to it at every width, so the row measured a fully opaque
+ * rgb(251, 248, 243) while the blur underneath had nothing to blur. Declared
+ * twice, !important wins, and neither declaration looks wrong on its own.
+ *
+ * So the attribute is gone from parts/header.html and the surface is stated
+ * here, once. Prototype: rgba(251, 248, 243, 0.92) + blur(10px).
+ */
+.brightpath-header__row {
+	min-height: 73px;
+	display: flex;
+	align-items: center;
+	background-color: color-mix(in srgb, var(--wp--preset--color--sand-50) 92%, transparent);
+	-webkit-backdrop-filter: blur(10px);
+	backdrop-filter: blur(10px);
+	border-bottom: 1px solid transparent;
+	transition:
+		box-shadow var(--wp--custom--transition--base),
+		border-color var(--wp--custom--transition--base),
+		background-color var(--wp--custom--transition--base);
+}
+
+/* The scrolled state. `.is-scrolled` is set by assets/js/chrome.js. The
+   prototype tightens the surface from 0.92 to 0.97 here, which was invisible
+   while the resting state was opaque. */
+.brightpath-header__row.is-scrolled {
+	background-color: color-mix(in srgb, var(--wp--preset--color--sand-50) 97%, transparent);
+	border-bottom-color: var(--wp--preset--color--sand-200);
+	box-shadow: var(--wp--custom--shadow--sm);
+}
+
+/* --------------------------------------------------------------------------
+   8  Current-page navigation state
+
+   inc/nav-state.php adds the class by comparing the rendered href with the
+   current request, rather than by post ID, so it survives a rebuild and works
+   on any install. Ancestor matching is what lights Services on a service page.
+   Prototype: main.css:925-926.
+   -------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------------------------
+   8a  Top-level navigation links — resting weight and the hover pill
+
+   Prototype main.css `.nav__link` / `.nav__link:hover`:
+       font-weight      500        built 400
+       hover background #DCE9E1    built transparent -- the pill never appeared
+   The colour half of the hover already worked, which is why the hover looked
+   merely subtle rather than absent.
+
+   A pill also needs a box to be a pill in: the built link had no padding, no
+   radius and a 25.5px box against the prototype's 44. 44 is the minimum touch
+   target, on a disability-services site, so the height is not decoration.
+
+   Scoped to the TOP-LEVEL list. `.wp-block-navigation__container` is also the
+   class on every submenu <ul>, so an unscoped rule would put a 44px pill on
+   each of the 12 links inside the mega panels, which the prototype does not do.
+   The current-page rule in section 8 is (0,3,0) doubled-class and still wins
+   over the 500 here; hover has to match that trick to reach the colour.
+   -------------------------------------------------------------------------- */
+
+.brightpath-header__row .wp-block-navigation__container:not(.wp-block-navigation__submenu-container) > .wp-block-navigation-item > .wp-block-navigation-item__content {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	padding-inline: var(--wp--preset--spacing--30);
+	font-weight: 500;
+	border-radius: var(--wp--custom--radius--sm);
+	transition:
+		color var(--wp--custom--transition--fast),
+		background-color var(--wp--custom--transition--fast);
+}
+
+.brightpath-header__row .wp-block-navigation__container:not(.wp-block-navigation__submenu-container) > .wp-block-navigation-item > .wp-block-navigation-item__content.wp-block-navigation-item__content:hover {
+	background-color: var(--wp--preset--color--forest-100);
+	color: var(--wp--custom--color--primary);
+}
+
+/* The resting rule above is (0,5,0) and section 8's current-page rule is
+   (0,4,1), so on its own it took the current link back from 600 to 500 -- a
+   regression introduced by the fix for defect C, measured on About. The
+   current-page weight is restated at the same scope so the two rules cannot
+   swap places again. */
+.brightpath-header__row .wp-block-navigation__container:not(.wp-block-navigation__submenu-container) > .current-menu-item > .wp-block-navigation-item__content,
+.brightpath-header__row .wp-block-navigation__container:not(.wp-block-navigation__submenu-container) > .current-menu-ancestor > .wp-block-navigation-item__content {
+	font-weight: 600;
+}
+
+/* core ships `.wp-block-navigation .wp-block-navigation-item__content
+   .wp-block-navigation-item__content { color: inherit }` -- a doubled class at
+   (0,3,0) purely to win the cascade. A plain descendant selector here reaches
+   (0,2,1), loses the colour, and still wins font-weight and the underline, so
+   the link goes bold and gains its rule while staying body-coloured. Matching
+   core's own trick is the honest fix; !important would win too and would be
+   harder to reason about the next time core changes. */
+.wp-block-navigation .current-menu-item > a.wp-block-navigation-item__content.wp-block-navigation-item__content,
+.wp-block-navigation a.current-menu-item.wp-block-navigation-item__content.wp-block-navigation-item__content,
+.wp-block-navigation .current-menu-ancestor > a.wp-block-navigation-item__content.wp-block-navigation-item__content {
+	color: var(--wp--custom--color--primary);
+	font-weight: 600;
+	position: relative;
+}
+
+.wp-block-navigation .current-menu-item > a::after,
+.wp-block-navigation a.current-menu-item::after {
+	content: '';
+	position: absolute;
+	left: var(--wp--preset--spacing--30);
+	right: var(--wp--preset--spacing--30);
+	bottom: 5px;
+	height: 2px;
+	background-color: var(--wp--preset--color--terracotta-600);
+	border-radius: var(--wp--custom--radius--full);
+}
+
+/* On the dark utility bar the underline would disappear into the surface. */
+.has-forest-900-background-color .current-menu-item > a::after {
+	background-color: var(--wp--preset--color--terracotta-100);
+}
+
+/* --------------------------------------------------------------------------
+   9  Floating chrome — back-to-top and the mobile sticky CTA
+
+   Both are injected by assets/js/chrome.js, so a page with JavaScript blocked
+   simply does not have them rather than having two dead controls. Prototype:
+   main.css .scroll-top and .sticky-cta.
+   -------------------------------------------------------------------------- */
+
+.bp-scroll-top {
+	position: fixed;
+	right: var(--wp--preset--spacing--50);
+	bottom: var(--wp--preset--spacing--50);
+	z-index: var(--z-dropdown);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 48px;
+	height: 48px;
+	padding: 0;
+	color: var(--wp--custom--color--text-invert);
+	background-color: var(--wp--preset--color--forest-700);
+	border: 0;
+	border-radius: 50%;
+	box-shadow: var(--wp--custom--shadow--lg);
+	cursor: pointer;
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(10px);
+	transition:
+		opacity var(--wp--custom--transition--base),
+		transform var(--wp--custom--transition--base),
+		visibility var(--wp--custom--transition--base),
+		background-color var(--wp--custom--transition--base);
+}
+
+.bp-scroll-top.is-visible {
+	opacity: 1;
+	visibility: visible;
+	transform: translateY(0);
+}
+
+.bp-scroll-top:hover {
+	background-color: var(--wp--custom--color--primary-hover);
+}
+
+/* The sticky CTA is mobile-only on the prototype: it is the counterpart of the
+   header CTA, which is hidden below the 1200px nav rung. */
+.bp-sticky-cta {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: var(--z-dropdown);
+	display: none;
+	align-items: center;
+	gap: var(--wp--preset--spacing--30);
+	padding: var(--wp--preset--spacing--30);
+	background-color: color-mix(in srgb, var(--wp--preset--color--sand-50) 96%, transparent);
+	-webkit-backdrop-filter: blur(10px);
+	backdrop-filter: blur(10px);
+	border-top: 1px solid var(--wp--preset--color--sand-200);
+	transform: translateY(100%);
+	transition: transform var(--wp--custom--transition--base);
+}
+
+.bp-sticky-cta.is-visible {
+	transform: translateY(0);
+}
+
+.bp-sticky-cta > a {
+	flex: 1 1 auto;
+	text-align: center;
+}
+
+.bp-sticky-cta__close {
+	flex: 0 0 auto;
+	width: 44px;
+	height: 44px;
+	font-size: 22px;
+	line-height: 1;
+	color: var(--wp--custom--color--text-muted);
+	background: none;
+	border: 0;
+	cursor: pointer;
+}
+
+@media (max-width: 1199px) {
+	.bp-sticky-cta { display: flex; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.bp-scroll-top,
+	.bp-sticky-cta { transition-duration: 0.01ms; }
+}
+
+/* --------------------------------------------------------------------------
+   10  The lede role
+
+   The prototype has three body tones and the build had one, which collapsed the
+   hierarchy between lede, body and caption and made every page read heavier.
+   theme.json now carries body=ink-700 and headings=ink-900; the lede is the
+   third tone and has no theme.json slot of its own.
+
+   Prototype main.css:313-317 — .lede is --text-lg, line-height 1.65,
+   colour ink-600, max-width 60ch. On the built site a lede is a paragraph
+   carrying the `large` size preset, so that is what this matches.
+   -------------------------------------------------------------------------- */
+
+p.has-large-font-size {
+	color: var(--wp--custom--color--text-muted);
+	line-height: 1.65;
+	max-width: 60ch;
+}
+
+/* On a dark band the muted tone inverts, as the prototype does at main.css:319. */
+.has-forest-900-background-color p.has-large-font-size {
+	color: var(--wp--custom--color--text-invert-muted);
+}
+
+/* --------------------------------------------------------------------------
+   11  The utility-bar message
+
+   The header part's own comment says the stylesheet hides this below 768px.
+   It did not -- there was no such rule anywhere, so the message wrapped and the
+   bar measured 84.2px at 390 against the prototype's 60px at every width.
+   A comment describing behaviour that does not exist is worse than no comment.
+
+   768px (47.9375rem) is the utility-bar rung and the ONLY thing it governs.
+   It is not a gutter rung and not a system breakpoint -- contract 3.
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 767px) {
+	.brightpath-utility-bar__message {
+		display: none;
+	}
+}
+
+
+/* --------------------------------------------------------------------------
+   12  The header's own height
+
+   60px utility bar + 73px row = 133. The header measured 157 at every width —
+   24px of block gap between the two groups that the prototype does not have,
+   and that design-QA found by subtracting rather than by looking. With the
+   gap gone the template-part's sticky offset above is exactly the bar's height.
+   -------------------------------------------------------------------------- */
+
+:root {
+	--wp--custom--utility-bar-height: 60px;
+}
+
+/* The 24px is a `margin-block-start`, not a gap: `.brightpath-header` is a FLOW
+   layout, and core emits `> * + * { margin-block-start: var(--wp--style--block-gap) }`
+   for it. `gap: 0` is inert on a block layout and left the header at 157px with
+   the sticky row pinning at 24 instead of 0. Doubled class to clear core's own
+   (0,2,0) container selector. */
+.brightpath-header.brightpath-header > * + * {
+	margin-block-start: 0;
+}
+
+/* --------------------------------------------------------------------------
+   13  The brand
+
+   The header carried a `core/site-logo` with no image set, which renders
+   nothing — so there was no home link in the header at all. A keyboard user's
+   first stop after the utility bar was the navigation. Design-QA read that as a
+   tab-order defect; the builder measured it and found the element simply absent,
+   which is a different problem with a different fix.
+
+   Prototype main.css `.brand`, `.brand__name`, `.brand__tag`.
+   -------------------------------------------------------------------------- */
+
+.bp-brand {
+	min-height: 44px;
+	flex-shrink: 0;
+}
+
+/* The mark is a `core/html` block, not a `core/site-logo`: it is a fixed brand
+   glyph with four coloured parts, and its fills are theme presets rather than a
+   raster the client would have to re-upload to re-tint. Geometry is copied from
+   the prototype's inline SVG verbatim; only the custom-property names change.
+
+   The lockup renders its own text and does NOT read the site-title option. The
+   option is "Bright Path" -- with a space the design does not have -- and it is
+   also the <title>, the feed title and the admin bar. Correcting the lockup by
+   editing a site-wide option would have been a settings change nobody asked
+   for, so the two are decoupled: the wordmark is content in the part, the
+   option keeps naming the site. */
+.bp-brand__mark-link {
+	display: inline-flex;
+	align-items: center;
+	flex-shrink: 0;
+	text-decoration: none;
+}
+
+.bp-brand__mark {
+	width: 38px;
+	height: 38px;
+	flex-shrink: 0;
+}
+
+.bp-brand__text {
+	line-height: 1.15;
+}
+
+.bp-brand__name a,
+.bp-brand__name {
+	font-size: 1.25rem;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	color: var(--wp--custom--color--primary);
+	text-decoration: none;
+}
+
+.bp-brand__tag,
+.bp-brand__tag a {
+	font-size: 0.6875rem;
+	font-weight: 600;
+	letter-spacing: 0.07em;
+	text-transform: uppercase;
+	color: var(--wp--custom--color--text-muted);
+	text-decoration: none;
+}
+
+/* 0.6875rem and 1.25rem are the only two sizes in this file with no preset
+   behind them: theme.json's nearest steps are 13px and 22px. They are stated
+   here rather than added to the global preset list because the brand lockup is
+   the only consumer, and a preset is a control the client sees in every
+   font-size picker on the site. */
+
+/* On forest-900 the lockup inverts, exactly as the prototype's
+   `.footer__brand .brand__name` / `.brand__tag` pair does. */
+.brightpath-footer .bp-brand__name,
+.brightpath-footer .bp-brand__name a {
+	color: var(--wp--custom--color--text-invert);
+}
+
+.brightpath-footer .bp-brand__tag,
+.brightpath-footer .bp-brand__tag a {
+	color: var(--wp--preset--color--sage-300);
+}
+
+/* --------------------------------------------------------------------------
+   13a  Footer column headings, demo note and acknowledgement
+
+   Three separate losses in the same part, measured at 1440 against the
+   prototype:
+
+     col-title    uppercase, letter-spacing 1.05px   built none / -0.225px
+     demo-note    tinted 5% panel, 16px, radius 10   built a bare transparent <p>
+     ack          15px, 0.6 alpha, 1px rule, 24px    built 13px, 0.72, no rule
+
+   The demo note and the acknowledgement together are most of a 175px footer
+   height deficit: prototype 853, built 678.
+
+   The two font sizes are fixed in parts/footer.html, not here, because a
+   `has-x-small-font-size` class is printed `!important` by core -- no
+   stylesheet rule can raise 13px to 15px, so the block has to stop asking for
+   x-small. That is the same class of trap as the header's opaque background.
+   -------------------------------------------------------------------------- */
+
+.brightpath-footer__col-title {
+	letter-spacing: 0.07em;
+	text-transform: uppercase;
+	margin-bottom: var(--wp--preset--spacing--40);
+}
+
+.brightpath-footer p.brightpath-footer__demo-note {
+	padding: var(--wp--preset--spacing--40);
+	margin-bottom: var(--wp--preset--spacing--50);
+	line-height: 1.6;
+	color: var(--wp--preset--color--sage-300);
+	background-color: color-mix(in srgb, var(--wp--preset--color--white) 5%, transparent);
+	border: 1px dashed var(--wp--custom--color--border-dark);
+	border-radius: var(--wp--custom--radius--md);
+}
+
+.brightpath-footer p.brightpath-footer__ack {
+	padding-block: var(--wp--preset--spacing--50);
+	border-top: 1px solid var(--wp--custom--color--border-dark);
+	line-height: 1.7;
+	color: color-mix(in srgb, var(--wp--preset--color--sand-50) 60%, transparent);
+	max-width: 80ch;
+}
+
+/* --------------------------------------------------------------------------
+   14  Breadcrumbs and the lede — shared chrome above every page hero
+
+   Both measured against the prototype at 1440 on a service page.
+
+   BREADCRUMB: prototype 76px, built 28.89px. The difference is `padding: 16px 0`
+   plus a 44px min-height on each link — and that 44 is not decoration, it is the
+   minimum touch target. A 28.9px breadcrumb is below it, on a site whose subject
+   is disability services. So this is an accessibility fix that happens to also
+   close a 47px height gap.
+
+   LEDE: line-height 1.7 against the prototype's 1.65. Section 10 already sets
+   this for `p.has-large-font-size`, but a template's lede is a
+   `core/post-excerpt`, which carries no size preset — so the rule never reached
+   the eight service pages, the locations or the SIL properties. Same role, two
+   element shapes; the rule has to name both.
+   -------------------------------------------------------------------------- */
+
+.wp-block-breadcrumbs {
+	padding-block: var(--wp--preset--spacing--40);
+}
+
+.wp-block-breadcrumbs a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+}
+
+.wp-block-post-excerpt__excerpt {
+	color: var(--wp--custom--color--text-muted);
+	line-height: 1.65;
+	max-width: 60ch;
+}
+
+.has-forest-900-background-color .wp-block-post-excerpt__excerpt {
+	color: var(--wp--custom--color--text-invert-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Notes moved out of parts/header.html, 2026-09-18
+
+   These lived as HTML comments inside the header group's innerHTML. Core's
+   save() does not regenerate a comment, so the stored markup and the generated
+   markup differed and the editor marked the header part INVALID in every
+   template — "This block contains unexpected or invalid content", with
+   "Attempt block recovery" offering to silently delete exactly these notes.
+
+   The PHP round-trip gate could never catch it: the file re-serialises
+   byte-identically. The editor validates a different pair — stored innerHTML
+   against what the JavaScript save() emits.
+
+   So prose belongs in a stylesheet, not in block content. Verbatim:
+
+   Utility bar. Hidden below 768px by .brightpath-utility-bar, which the theme
+        stylesheet handles. 768 is the utility-bar rung ONLY -- it is NOT a gutter
+        rung and must never be used as one.
+   
+   ---
+   
+   Header row.
+   
+   ---
+   
+   core/navigation submenus hold LINKS ONLY.
+   
+        The prototype's mega panels add a per-link icon tile, a description line
+        and a panel foot line. None of that is expressible in a core/navigation
+        submenu. It is contract section 12, open question 8, and is EXPLICITLY OUT
+        OF SCOPE for this plan -- answering it decides whether the header is
+        editable in the Site Editor at all. Do not add it here without Main.
+   
+        overlayMenu is "mobile"; core's own mobile breakpoint is 600px and is
+        overridden to 1200px in style.css. main.js hardcodes the same 1200
+        (DESKTOP_MQ = '(min-width: 75rem)'). Move one, move both.
+   -------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   13b. Two values the chrome round measured but left, because they sat outside
+   the named defects. Both are measured against the prototype at 1440.
+
+   Nav font-size: prototype 16px, build 15px. Same element, same family and
+   weight; only the size differed.
+
+   Footer link touch target: the prototype gives EVERY footer link
+   `min-height: 44px` with `display: flex` -- 22 of 22 measure exactly 44. The
+   build measured 13-44px with 22 of 24 UNDER 44. That is the WCAG 2.5.8
+   minimum target size, and this is a disability-services site, so it is an
+   accessibility defect as much as a fidelity one. It is stated here rather
+   than left implicit because a future retune of footer spacing must not be
+   able to take it back below 44.
+
+   The first measurement of this said the prototype had ZERO footer links. That
+   was a selector fault, not a finding: the prototype uses relative hrefs
+   ("about.html"), so a filter requiring a leading "/" removed all of them.
+   Compare the same elements, not the same-looking rule.
+   --------------------------------------------------------------------------- */
+
+.brightpath-header .wp-block-navigation__container > .wp-block-navigation-item > .wp-block-navigation-item__content {
+	font-size: 16px;
+}
+
+.brightpath-footer a:not([href^="tel:"]):not([href^="mailto:"]) {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+}
+
+/* --------------------------------------------------------------------------
+   20  Chrome parity, measured 2026-09-28 at 1440 / 390 against main.css
+
+   utility bar  proto: 1240 container, space-between, 15px, links 600 sand-50,
+                no underline                  built: centred 565px, 13px, underlined
+   header row   proto: 1240 container (132..1308 content)   built: 1176 centred at 161
+   footer       proto: bare lists, 15px links, muted, no underline, 0 top margin
+                built: bullets + 40px indent, underlined, 24px root block gap
+   -------------------------------------------------------------------------- */
+
+.brightpath-utility-bar > .wp-block-group,
+.brightpath-header__row > .brightpath-header__inner {
+	max-width: 1176px;
+	width: 100%;
+	margin-inline: auto !important;
+}
+.brightpath-utility-bar .has-x-small-font-size { font-size: var(--wp--preset--font-size--small) !important; }
+.brightpath-utility-bar__message { color: var(--wp--custom--color--text-invert-muted); display: inline-flex; align-items: center; gap: 8px; }
+.brightpath-utility-bar__message::before {
+	content: ""; width: 16px; height: 16px; flex: none;
+	background-color: var(--wp--preset--color--sage-300);
+	-webkit-mask: var(--bp-icon, var(--bp-icon-info-circle)) center / contain no-repeat;
+	mask: var(--bp-icon, var(--bp-icon-info-circle)) center / contain no-repeat;
+}
+.brightpath-utility-bar__links { gap: var(--wp--preset--spacing--40); }
+.brightpath-utility-bar a:where(:not(.wp-element-button)) {
+	color: var(--wp--preset--color--sand-50);
+	font-weight: 600;
+	text-decoration: none;
+	display: inline-flex; align-items: center; min-height: 44px;
+}
+.brightpath-utility-bar a:hover { color: var(--wp--preset--color--terracotta-100); text-decoration: underline; text-underline-offset: .2em; }
+
+/* Header phone (proto .header__phone, display:none until 1400px). */
+.brightpath-header__phone { display: none; align-items: center; gap: 8px; min-height: 44px; padding-inline: 8px; font-weight: 600; color: var(--wp--preset--color--ink-900, #1c2620) !important; text-decoration: none !important; white-space: nowrap; border-radius: var(--wp--custom--radius--sm); flex-shrink: 0; }
+.brightpath-header__phone::before { content: ""; width: 18px; height: 18px; background-color: var(--wp--preset--color--sage-600, #4a7355); -webkit-mask: var(--bp-icon, var(--bp-icon-phone)) center / contain no-repeat; mask: var(--bp-icon, var(--bp-icon-phone)) center / contain no-repeat; }
+.brightpath-header__phone:hover { color: var(--wp--preset--color--terracotta-600) !important; }
+@media (min-width: 1400px) { .brightpath-header__phone { display: inline-flex; } }
+.brightpath-header__actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+
+/* Footer */
+footer.wp-block-template-part { margin-block-start: 0; }
+.brightpath-footer { color: var(--wp--custom--color--text-invert-muted); }
+.brightpath-footer .wp-block-list.brightpath-footer__list { list-style: none; padding-left: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.brightpath-footer .brightpath-footer__list li { margin: 0; }
+.brightpath-footer a:where(:not(.wp-element-button)) { color: var(--wp--custom--color--text-invert-muted); text-decoration: none; }
+.brightpath-footer a:where(:not(.wp-element-button)):hover { color: var(--wp--preset--color--sand-50); text-decoration: underline; text-underline-offset: .2em; }
+.brightpath-footer .bp-brand__name a, .brightpath-footer .bp-brand__tag a { min-height: 0; display: inline; }
+.brightpath-footer .bp-brand__name a { color: var(--wp--preset--color--sand-50); }
+.brightpath-footer .bp-brand__tag a { color: var(--wp--preset--color--sage-300); }
+.brightpath-footer__columns > .wp-block-column > * + * { margin-block-start: 16px; }
+.brightpath-footer__columns > .wp-block-column > .brightpath-footer__col-title + * { margin-block-start: 0; }
+.brightpath-footer__contact-item { display: flex; gap: 12px; align-items: flex-start; }
+.brightpath-footer__contact-item::before {
+	content: ""; width: 18px; height: 18px; margin-top: 3px; flex: none;
+	background-color: var(--wp--preset--color--sage-300);
+	-webkit-mask: var(--bp-icon, none) center / contain no-repeat; mask: var(--bp-icon, none) center / contain no-repeat;
+}
+.brightpath-footer__columns > .wp-block-column:nth-child(4) > .brightpath-footer__contact-item:nth-of-type(1):not([class*="bp-icon--"]) { --bp-icon: var(--bp-icon-phone); }
+.brightpath-footer__columns > .wp-block-column:nth-child(4) > .brightpath-footer__contact-item:nth-of-type(2):not([class*="bp-icon--"]) { --bp-icon: var(--bp-icon-mail); }
+.brightpath-footer__columns > .wp-block-column:nth-child(4) > .brightpath-footer__contact-item:nth-of-type(3):not([class*="bp-icon--"]) { --bp-icon: var(--bp-icon-map-pin); }
+.brightpath-footer__columns > .wp-block-column:nth-child(4) > .brightpath-footer__contact-item:nth-of-type(4):not([class*="bp-icon--"]) { --bp-icon: var(--bp-icon-clock); }
+.brightpath-footer__contact-item a { padding-block: .75rem; margin-block: -.75rem; }
+.brightpath-footer .brightpath-footer__bottom .has-x-small-font-size { font-size: var(--wp--preset--font-size--small) !important; }
+.brightpath-footer__legal-links { display: flex; flex-wrap: wrap; gap: 24px; }
+.brightpath-footer p.brightpath-footer__demo-note { max-width: 1176px; margin-inline: auto !important; width: 100%; box-sizing: border-box; }
+.brightpath-footer p.brightpath-footer__ack { margin-left: max(0px, calc((100% - 1176px) / 2)) !important; margin-right: auto !important; }
+/* proto .site-header__inner: brand | nav | [phone cta] with 24px gaps; the
+   nav takes the slack so phone+CTA stay flush right. */
+.brightpath-header__inner.brightpath-header__inner { justify-content: flex-start; gap: 24px; }
+.brightpath-header__inner > .wp-block-navigation { margin-right: auto; }
+.brightpath-header__inner > .brightpath-header__phone { margin-right: -12px; }
+.brightpath-header__inner > .wp-block-navigation,
+.brightpath-header__inner > .brightpath-header__cta { flex-shrink: 0; }
+.brightpath-header__cta .wp-block-button__link { white-space: nowrap; }
+.brightpath-header .wp-block-navigation__container { flex-wrap: nowrap; }
+/* The prototype stacks header, main and footer flush: the core root block
+   gap put main at 157 against 133 and the footer 24px low on every page. */
+.wp-site-blocks > main, .wp-site-blocks > footer, .wp-site-blocks > .wp-block-group { margin-block-start: 0; }
+
+/* Below the 1200 nav rung (main.css .header__cta{display:none}, .nav-toggle 48x48
+   bordered box at the right edge). Built: CTA stayed visible and the bare 24px
+   toggle sat mid-row. Utility bar <768: links centred, 24px gap, nowrap
+   (built wrapped to 135px against 60). */
+@media (max-width: 1199px) {
+	.brightpath-header__inner > .brightpath-header__cta { display: none; }
+	.brightpath-header__inner > .wp-block-navigation { margin-left: auto; margin-right: 0; order: 5; }
+	.brightpath-header .wp-block-navigation__responsive-container-open {
+		width: 48px; height: 48px; align-items: center; justify-content: center;
+		border: 1.5px solid var(--wp--custom--color--border-strong, #d8cebd);
+		border-radius: var(--wp--custom--radius--md, 10px);
+		background: var(--wp--preset--color--white, #fff);
+		color: var(--wp--preset--color--ink-900, #1c2620);
+	}
+	.brightpath-header .wp-block-navigation__responsive-container-open svg { width: 22px; height: 22px; }
+}
+@media (max-width: 767px) {
+	.brightpath-utility-bar > .wp-block-group { justify-content: center; }
+	.brightpath-utility-bar__links { flex-wrap: nowrap; justify-content: center; gap: 24px; }
+	.brightpath-utility-bar a { white-space: nowrap; }
+}
+@media (max-width: 767px) { .brightpath-utility-bar .brightpath-utility-bar__message { display: none; } }
+
+
+/* ==========================================================================
+   21  G2 global parity (2026-09-28) — each value traced to main.css
+   ========================================================================== */
+
+/* 21a  .btn system, main.css:494-550. Was scoped to `.form` in forms.css only,
+   so every .btn outside a form (job card CTAs, empty states, sidebar cards)
+   rendered as a bare link. Now global; the forms.css copies are removed. */
+.btn {
+	--btn-bg: var(--wp--custom--color--primary);
+	--btn-fg: var(--wp--custom--color--text-invert);
+	--btn-border: transparent;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--wp--preset--spacing--20);
+	min-height: 48px;
+	padding: 0.75rem 1.5rem;
+	font-family: var(--wp--preset--font-family--figtree);
+	font-size: 1rem;
+	font-weight: 600;
+	line-height: 1;
+	letter-spacing: 0.005em;
+	text-align: center;
+	text-decoration: none;
+	color: var(--btn-fg);
+	background-color: var(--btn-bg);
+	border: 1.5px solid var(--btn-border);
+	border-radius: var(--wp--custom--radius--md);
+	cursor: pointer;
+	transition: background-color var(--wp--custom--transition--base), border-color var(--wp--custom--transition--base),
+		color var(--wp--custom--transition--base), transform var(--wp--custom--transition--fast), box-shadow var(--wp--custom--transition--base);
+}
+.btn:hover { background-color: var(--wp--custom--color--primary-hover); color: var(--btn-fg); transform: translateY(-1px); box-shadow: var(--wp--custom--shadow--sm); }
+.btn:active { transform: translateY(0); box-shadow: none; }
+.btn[disabled], .btn[aria-disabled="true"] {
+	background-color: var(--wp--preset--color--sand-200);
+	color: var(--wp--custom--color--text-subtle);
+	border-color: transparent; cursor: not-allowed; transform: none; box-shadow: none;
+}
+.btn--accent { --btn-bg: var(--wp--custom--color--accent); }
+.btn--accent:hover { background-color: var(--wp--custom--color--accent-hover); }
+.btn--outline { --btn-bg: transparent; --btn-fg: var(--wp--custom--color--primary); --btn-border: var(--wp--custom--color--border-strong); }
+.btn--outline:hover { background-color: var(--wp--preset--color--forest-100); border-color: var(--wp--custom--color--primary); }
+.btn--ghost { --btn-bg: transparent; --btn-fg: var(--wp--custom--color--primary); }
+.btn--ghost:hover { background-color: var(--wp--preset--color--forest-100); box-shadow: none; }
+.btn--on-dark { --btn-bg: var(--wp--custom--color--text-invert); --btn-fg: var(--wp--preset--color--forest-900); }
+.btn--on-dark:hover { background-color: var(--wp--custom--color--surface); }
+.btn--outline-dark { --btn-bg: transparent; --btn-fg: var(--wp--custom--color--text-invert); --btn-border: var(--wp--custom--color--border-dark); }
+.btn--outline-dark:hover { background-color: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.4); }
+.btn--lg { min-height: 56px; padding: 1rem 2rem; font-size: var(--wp--preset--font-size--medium); }
+.btn--sm { min-height: 44px; padding: 0.5rem 1rem; font-size: var(--wp--preset--font-size--small); }
+.btn--block { width: 100%; }
+.btn__icon, .btn > svg { width: 20px; height: 20px; }
+
+/* 21b  Breadcrumb, main.css:1386-1395. Measured: links 17px/400 forest,
+   underlined (theme.json link element); current item 400 ink-700; separator
+   core's opacity .7 "/". Design: 15px muted, no underline, current 600 ink-900,
+   "/" in ink-400 with 8px either side. */
+.wp-block-breadcrumbs ol {
+	gap: 0;
+	font-size: var(--wp--preset--font-size--small);
+	color: var(--wp--custom--color--text-muted);
+}
+.wp-block-breadcrumbs li:not(:last-child)::after {
+	margin: 0 var(--wp--preset--spacing--20);
+	opacity: 1;
+	color: var(--wp--custom--color--text-subtle);
+}
+.wp-block-breadcrumbs a:where(:not(.wp-element-button)) {
+	color: inherit;
+	text-decoration: none;
+}
+.wp-block-breadcrumbs a:where(:not(.wp-element-button)):hover {
+	color: var(--wp--custom--color--accent);
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+.wp-block-breadcrumbs [aria-current="page"] {
+	color: var(--wp--custom--color--text);
+	font-weight: 600;
+}
+.has-forest-900-background-color .wp-block-breadcrumbs ol,
+.has-forest-900-background-color .wp-block-breadcrumbs a:where(:not(.wp-element-button)) { color: var(--wp--custom--color--text-invert-muted); }
+.has-forest-900-background-color .wp-block-breadcrumbs [aria-current="page"] { color: var(--wp--custom--color--text-invert); }
+
+/* 21c  .link-arrow, main.css:566-581. Measured: inline, 17px, 20px tall.
+   Design: inline-flex 16px/600 with a 44px tap height and an 18px arrow. */
+.link-arrow {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--wp--preset--spacing--20);
+	min-height: 44px;
+	font-size: 1rem;
+	font-weight: 600;
+	color: var(--wp--custom--color--primary);
+	text-decoration: none;
+	transition: color var(--wp--custom--transition--fast);
+}
+.link-arrow::after {
+	content: "";
+	flex: 0 0 auto;
+	width: 18px;
+	height: 18px;
+	background-color: currentColor;
+	-webkit-mask: var(--bp-icon-arrow-right) center / contain no-repeat;
+	mask: var(--bp-icon-arrow-right) center / contain no-repeat;
+	transition: transform var(--wp--custom--transition--base);
+}
+.link-arrow:hover { color: var(--wp--custom--color--accent); }
+.link-arrow:hover::after { transform: translateX(4px); }
+.has-forest-900-background-color .link-arrow { color: var(--wp--custom--color--text-invert); }
+.has-forest-900-background-color .link-arrow:hover { color: var(--wp--preset--color--terracotta-100); }
+
+/* 21d  Accordion trigger letter-spacing, main.css:1314 (none set = normal).
+   The toggle declared `letter-spacing: inherit` and so took the h3's -0.01em. */
+.wp-block-accordion-heading__toggle { letter-spacing: normal; }
+
+
+/* 21e  Eyebrow -> heading in flat post content. main.css .section__head is a
+   flex column with a 16px gap and h2{margin:0}; where a head's eyebrow and
+   heading sit directly in post-content's constrained flow (location pages),
+   core's root flow gap put 32px between them. The heading keeps 0 margin of
+   its own and the gap is restated at the design's 16px. Hero and panel heads
+   (their own groups, 24px gap by design) are not matched. */
+.wp-block-post-content > .bp-eyebrow + :is(h2, h3) {
+	margin-block-start: var(--wp--preset--spacing--40);
+}
+
+/* 21f  Footer vertical rhythm, main.css:1075-1115. Measured 909 vs 853 at 1440:
+   note sat 40px under the columns (design: grid padding-bottom 64), the bottom
+   row had 40px above and no padding below (design 24/24 with the note's 24px
+   margin above), the acknowledgement had a 40px block gap above (design 0, it
+   carries its own border and 24px padding), and the footer closed on a 48px
+   padding the design does not have. */
+.brightpath-footer > .brightpath-footer__demo-note { margin-block-start: var(--wp--preset--spacing--90); }
+.brightpath-footer > .brightpath-footer__bottom {
+	margin-block-start: 0;
+	padding-block: var(--wp--preset--spacing--50) !important;
+}
+.brightpath-footer > .brightpath-footer__ack { margin-block-start: 0 !important; }
+
+
+/* ==========================================================================
+   22  Desktop mega panels (main.css:939-982), built from core blocks only.
+   Each submenu item is a core/navigation-link with a `description` (core
+   prints it as .wp-block-navigation-item__description) and a bp-icon--*
+   class; the tile is a ::before mask. The last item of Services carries
+   .bp-nav-panel-foot and becomes the panel foot line. Desktop rung only
+   (>=1200px); the mobile overlay keeps plain links.
+   ========================================================================== */
+.wp-block-navigation-item__description { display: none; }
+
+@media (min-width: 1200px) {
+	.brightpath-header .wp-block-navigation .has-child > .wp-block-navigation__submenu-container {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--wp--preset--spacing--20);
+		top: calc(100% + 8px);
+		left: 50%;
+		width: min(38rem, 90vw) !important;
+		min-width: 0 !important;
+		padding: var(--wp--preset--spacing--50);
+		background-color: var(--wp--custom--color--surface) !important;
+		border: 1px solid var(--wp--custom--color--border);
+		border-radius: var(--wp--custom--radius--lg);
+		box-shadow: var(--wp--custom--shadow--lg);
+		transform: translateX(-50%) translateY(-6px);
+		transition: opacity var(--wp--custom--transition--base), transform var(--wp--custom--transition--base), visibility var(--wp--custom--transition--base);
+	}
+	/* hover bridge over the 8px offset so the pointer can travel into it */
+	.brightpath-header .wp-block-navigation .has-child > .wp-block-navigation__submenu-container::before {
+		content: ""; position: absolute; left: 0; right: 0; top: -10px; height: 10px;
+	}
+	.brightpath-header .wp-block-navigation .has-child .wp-block-navigation-submenu__toggle[aria-expanded="true"] ~ .wp-block-navigation__submenu-container {
+		transform: translateX(-50%) translateY(0);
+	}
+	.brightpath-header .wp-block-navigation .has-child.bp-esc-closed > .wp-block-navigation__submenu-container {
+		opacity: 0 !important; visibility: hidden !important;
+	}
+	.brightpath-header .wp-block-navigation__submenu-container > .bp-nav-panel-link > .wp-block-navigation-item__content {
+		display: grid !important;
+		grid-template-columns: 40px minmax(0, 1fr);
+		column-gap: var(--wp--preset--spacing--30);
+		align-items: start;
+		padding: var(--wp--preset--spacing--30) !important;
+		border-radius: var(--wp--custom--radius--md);
+		color: var(--wp--custom--color--text);
+		text-decoration: none;
+		transition: background-color var(--wp--custom--transition--fast);
+	}
+	.brightpath-header .bp-nav-panel-link > .wp-block-navigation-item__content::before {
+		content: "";
+		grid-row: 1 / span 2;
+		width: 40px; height: 40px;
+		border-radius: var(--wp--custom--radius--sm);
+		background: var(--wp--preset--color--forest-700) padding-box;
+		background-color: var(--wp--preset--color--forest-100);
+		-webkit-mask: none; mask: none;
+		box-shadow: none;
+		transition: background-color var(--wp--custom--transition--base);
+	}
+	/* the icon glyph: a second layer on the label's ::before is not available,
+	   so the tile colour is the background and the glyph is painted by a
+	   20px mask on an absolutely placed ::after */
+	.brightpath-header .bp-nav-panel-link > .wp-block-navigation-item__content { position: relative; }
+	.brightpath-header .bp-nav-panel-link > .wp-block-navigation-item__content::after {
+		content: "";
+		position: absolute;
+		left: calc(var(--wp--preset--spacing--30) + 10px);
+		top: calc(var(--wp--preset--spacing--30) + 10px);
+		width: 20px; height: 20px;
+		background-color: var(--wp--preset--color--forest-700);
+		-webkit-mask: var(--bp-icon) center / contain no-repeat;
+		mask: var(--bp-icon) center / contain no-repeat;
+	}
+	.brightpath-header .bp-nav-panel-link > .wp-block-navigation-item__content:hover { background-color: var(--wp--custom--color--bg-soft); }
+	.brightpath-header .bp-nav-panel-link > .wp-block-navigation-item__content:hover::before { background-color: var(--wp--preset--color--forest-700); }
+	.brightpath-header .bp-nav-panel-link > .wp-block-navigation-item__content:hover::after { background-color: var(--wp--custom--color--text-invert); }
+	.brightpath-header .bp-nav-panel-link .wp-block-navigation-item__label {
+		font-size: var(--wp--preset--font-size--small); font-weight: 600; line-height: 1.3;
+	}
+	.brightpath-header .wp-block-navigation__submenu-container .wp-block-navigation-item__description {
+		display: block;
+		margin-top: 2px;
+		font-size: var(--wp--preset--font-size--x-small);
+		line-height: 1.5;
+		font-weight: 400;
+		color: var(--wp--custom--color--text-muted);
+	}
+	/* panel foot: main.css .nav__panel-foot -- muted line left, link-arrow right */
+	.brightpath-header .wp-block-navigation__submenu-container > .bp-nav-panel-foot {
+		grid-column: 1 / -1;
+		margin-top: var(--wp--preset--spacing--20);
+		padding-top: var(--wp--preset--spacing--40);
+		border-top: 1px solid var(--wp--custom--color--border);
+	}
+	.brightpath-header .bp-nav-panel-foot > .wp-block-navigation-item__content {
+		display: flex !important;
+		flex-direction: row-reverse;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--wp--preset--spacing--40);
+		padding: 0 !important;
+		min-height: 44px;
+		text-decoration: none;
+	}
+	.brightpath-header .bp-nav-panel-foot .wp-block-navigation-item__label {
+		display: inline-flex; align-items: center; gap: var(--wp--preset--spacing--20);
+		font-size: 1rem; font-weight: 600; color: var(--wp--custom--color--primary); white-space: nowrap;
+	}
+	.brightpath-header .bp-nav-panel-foot .wp-block-navigation-item__label::after {
+		content: ""; width: 18px; height: 18px; background-color: currentColor;
+		-webkit-mask: var(--bp-icon-arrow-right) center / contain no-repeat;
+		mask: var(--bp-icon-arrow-right) center / contain no-repeat;
+	}
+	.brightpath-header .bp-nav-panel-foot .wp-block-navigation-item__content:hover .wp-block-navigation-item__label { color: var(--wp--custom--color--accent); }
+	.brightpath-header .bp-nav-panel-foot .wp-block-navigation-item__description {
+		margin: 0; font-size: var(--wp--preset--font-size--small);
+	}
+}
+@media (max-width: 1199px) {
+	.brightpath-header .bp-nav-panel-foot { display: none !important; }
+}

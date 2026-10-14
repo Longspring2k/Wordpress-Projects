@@ -1,0 +1,64 @@
+/* ==== A1. Decorative blob (.cta__shape) ====
+   An empty core/group renders as a group PLACEHOLDER inside an unclassed <div>
+   wrapper, so the front's `> .cta__shape` child selectors never match and the
+   blob stacked above the text as a 26rem picker box. Re-create the front
+   geometry for the editor: wrapper is transparent to layout, the blob is
+   absolutely placed, the placeholder chrome only shows once it is selected. */
+.editor-styles-wrapper div:has(> .cta__shape.wp-block-group__placeholder) { display: contents; }
+.editor-styles-wrapper .cta__shape.wp-block-group__placeholder {
+	position: absolute;
+	margin: 0;
+	max-width: none;
+	min-height: 0;
+	padding: 0;
+	pointer-events: auto;
+	overflow: hidden;
+}
+.editor-styles-wrapper .cta__shape.wp-block-group__placeholder:not(.is-selected) .components-placeholder { display: none; }
+.editor-styles-wrapper .cta__shape.wp-block-group__placeholder.is-selected { opacity: 1; z-index: 2; }
+.editor-styles-wrapper .cta__shape.wp-block-group__placeholder .components-placeholder { min-height: 0; background: rgb(255 255 255 / .85); box-shadow: none; }
+.editor-styles-wrapper .bp-panel:has(.cta__shape.wp-block-group__placeholder) { overflow: hidden; }
+/* SIL feature blob: the other corner (bands.css `.bp-sil-feature > .cta__shape`). */
+.editor-styles-wrapper .bp-sil-feature .cta__shape.wp-block-group__placeholder {
+	right: auto; top: -20%; left: -8%; width: 30rem; height: 30rem;
+	border-radius: 52% 48% 42% 58% / 48% 52% 48% 52%;
+	background: radial-gradient(circle at 40% 40%, color-mix(in srgb, var(--wp--preset--color--sage-500) 40%, transparent), transparent 70%);
+	opacity: 0.6;
+}
+/* text lifts above the blob, first sibling after the blob has no flow gap */
+.editor-styles-wrapper :is(.bp-cta, .bp-sil-feature) > div:has(> .cta__shape.wp-block-group__placeholder) + * { margin-top: 0 !important; }
+.editor-styles-wrapper .bp-sil-feature > div:has(> .cta__shape.wp-block-group__placeholder) + * { margin-top: 0; }
+
+/* ==== A2. Accordion: closed panels collapse to 0 like the front ====
+   Front panels carry hidden="until-found" (content-visibility:hidden -> 0px);
+   the editor renders a plain hidden="" that the theme's display:grid override
+   keeps in flow, so the answer's 24px bottom padding leaks (24px per item).
+   Only [hidden] (closed) panels are touched: a selected/open item keeps its panel. */
+.wp-block-accordion-panel[hidden] > * { padding-block: 0 !important; margin-block: 0 !important; }
+
+/* ==== A3. Layout-rule order: class max-width on constrained children ====
+   The block-layout `.is-layout-constrained > :where(...) {max-width:content-size}`
+   is emitted AFTER the editor stylesheets and ties on specificity with single-class
+   theme rules, so `.bp-head{max-width:56ch}` lost in the canvas. */
+.editor-styles-wrapper .bp-head { max-width: 56ch; }
+
+/* ==== A4. Empty slot group in the page hero ====
+   Front: `.bp-page-hero .bp-slot:empty {display:none}`. Editor draws a 122px group
+   placeholder. Collapse it (and the flow margin of its wrapper) until it is selected. */
+.editor-styles-wrapper .bp-page-hero div:has(> .bp-slot.wp-block-group__placeholder:not(.is-selected)) { margin-top: 0 !important; }
+.editor-styles-wrapper .bp-page-hero .bp-slot.wp-block-group__placeholder:not(.is-selected) { height: 0; min-height: 0; margin: 0; overflow: hidden; }
+.editor-styles-wrapper .bp-page-hero .bp-slot.wp-block-group__placeholder:not(.is-selected) .components-placeholder { min-height: 0; padding: 0; }
+
+/* ==== A5. Post-content column width for the two prose templates ====
+   Front: resource text column is 726px (article-layout), job body is the 1.6fr
+   column of the 1.6fr/.9fr detail grid (1176 - 56 gap) = 717px. Canvas root is
+   full width, so paragraphs wrapped at 1240/1176 and read half as tall. */
+body.bp-tpl--single-resource .is-root-container { max-width: 726px; }
+body.bp-tpl--single-job .is-root-container.bp-job-content { max-width: 717px !important; margin-inline: max(0px, calc((100% - 1176px) / 2)) auto !important; padding-inline: 0; }
+
+/* ==== A6. Empty Buttons group ====
+   Front prints nothing for a buttons block whose buttons have no label
+   (fix-a: `.wp-block-buttons:not(:has(.wp-block-button)) {display:none}` after PHP drops
+   empty buttons). The canvas keeps an empty 'Add text...' button (48px + 24px flow gap).
+   Collapse only while every button is empty and nothing inside is focused/selected. */
+.wp-block-buttons:has(> .wp-block-button:only-child > .wp-block-button__link > [data-rich-text-placeholder]):not(.is-selected):not(:has(.is-selected)):not(:focus-within) { display: none; }

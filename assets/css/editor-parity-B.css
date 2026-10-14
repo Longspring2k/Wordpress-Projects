@@ -1,0 +1,48 @@
+/* editor parity lane B — query-loop cards, bound values, PHP-rendered widgets.
+   Loaded inside the canvas only (add_editor_style); the front never sees this. */
+
+/* B1. The excerpt's empty "Add read more link text" field (and the preview copies' <br>): the
+   front prints nothing when moreText is empty. Keep the field reachable while its block is selected. */
+.editor-styles-wrapper .wp-block-post-excerpt__more-text:has(> a:empty) { display: none !important; }
+.editor-styles-wrapper .wp-block-post-excerpt__more-text:has(> a > br:only-child) { display: none !important; }
+.editor-styles-wrapper .wp-block-post-excerpt:not(.is-selected):not(:focus-within) .wp-block-post-excerpt__more-text:has([data-rich-text-placeholder]) { display: none !important; }
+
+/* B2. Media frames: core's media placeholder ("has-illustration") carries a 100px backdrop blur
+   that smeared the hatch and the frame icon out of the tinted frames (contact map tile). */
+.editor-styles-wrapper .bp-media .components-placeholder,
+.editor-styles-wrapper .bp-media .components-placeholder::before { -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+/* B3. Callout title icon: the block wrapper is position:relative in the editor, so the front's
+   absolutely-placed ::before icon anchored to the title instead of the callout's text group. */
+.editor-styles-wrapper .bp-callout .callout__title.bp-icon { position: static; }
+
+/* B4. Card media pulls the card's top padding back out (bands.css `.bp-panel > .bp-media`). In the
+   canvas the flow-layout `:first-child { margin-block-start: 0 }` rule wins over it. */
+.editor-styles-wrapper .bp-panel > .bp-media:first-child { margin-block-start: calc(-1 * var(--wp--preset--spacing--50)); }
+
+/* Main: empty featured-image placeholder inside .bp-media sat in the flex flow
+   (418px) and pushed the centred ::before icon to the top. On the front an
+   empty featured image prints nothing, so take the placeholder out of flow and
+   make it invisible until the block is selected (it stays clickable). */
+.editor-styles-wrapper .bp-media > .wp-block-post-featured-image:has(.components-placeholder):not(.is-selected):not(.has-child-selected) {
+	position: absolute !important;
+	inset: 0;
+	height: auto !important;
+	margin: 0 !important;
+	z-index: 1;
+}
+.editor-styles-wrapper .bp-media > .wp-block-post-featured-image:not(.is-selected) > .components-placeholder {
+	opacity: 0;
+	height: 100%;
+	min-height: 0;
+}
+
+/* Main: icon-only paragraphs (benefit icons, icon tiles) are empty rich-text,
+   so core printed "Type / to choose a block" inside a 40px box, where it wrapped
+   one letter per line over the neighbouring text. The front prints nothing
+   there. The icon is changed from the block sidebar Icon panel, not by typing. */
+.editor-styles-wrapper .bp-icon > [data-rich-text-placeholder],
+.editor-styles-wrapper .icon-tile > [data-rich-text-placeholder],
+.editor-styles-wrapper .benefit__icon > [data-rich-text-placeholder] {
+	display: none !important;
+}

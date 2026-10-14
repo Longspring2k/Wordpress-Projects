@@ -1,0 +1,40 @@
+/* Editor-canvas-only overrides. Loaded via add_editor_style (scoped under
+   .editor-styles-wrapper by WP), never on the front end. */
+
+/* 1. Empty core/image in a .bp-media frame: the front end renders nothing
+   (image.php returns ''), so the frame shows only surface + label. Mirror
+   that: strip core's grey dashed placeholder, keep it clickable. */
+.bp-media:not(:has(img[src])) > .wp-block-image {
+	position: absolute;
+	inset: 0;
+	height: auto;
+	z-index: 0;
+}
+.bp-media:not(:has(img[src])) > .wp-block-image .components-placeholder {
+	min-height: 0;
+	height: 100%;
+	background: transparent;
+	box-shadow: none;
+	border: 0;
+	outline: 0;
+	color: transparent;
+}
+.bp-media:not(:has(img[src])) > .wp-block-image:not(.is-selected) .components-placeholder > *,
+.bp-media .wp-block-image .components-placeholder__illustration {
+	display: none;
+}
+.bp-media:not(:has(img[src])) > .bp-media__label { position: relative; z-index: 1; }
+.bp-media > .wp-block-image.is-selected .components-placeholder {
+	background: rgb(255 255 255 / .85);
+	color: inherit;
+	align-items: center;
+	justify-content: center;
+}
+
+/* 2. Title field: front-page and page-no-title templates never print it. */
+.bp-editor--no-title .editor-visual-editor__post-title-wrapper { display: none; }
+
+/* 3. Editor chrome that breaks band rhythm. */
+.is-root-container > .block-list-appender { margin-block: 0; }
+.is-root-container > .wp-block.alignfull { margin-block-start: 0; }
+.editor-styles-wrapper .is-root-container.has-global-padding > .alignfull { max-width: none; }

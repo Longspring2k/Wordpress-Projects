@@ -1,0 +1,203 @@
+/* parity pass shard fix-a — owned by one agent only (pages: home, about, services, careers, our-team, sil) */
+
+/* A1 split section head -> grid gap is 48px in HTML (.section__head margin-bottom: space-8) */
+:is(body.home, body.bp-page-about, body.post-type-archive-service, body.bp-page-careers, body.bp-page-our-team, body.bp-page-sil) .bp-slot > .bp-head-split + .wp-block-query { margin-top: 48px; }
+:is(body.home, body.bp-page-about, body.post-type-archive-service, body.bp-page-careers, body.bp-page-our-team, body.bp-page-sil) .bp-slot > .bp-reveal:first-child:not(.bp-head-split) + .wp-block-query { margin-top: 48px; }
+
+/* A2 home "In their words": head max 56ch, testimonial card 32px padding, person row 58px */
+body.home .bp-slot > .bp-reveal:first-child:has(+ .wp-block-columns.bp-grid-3) { max-width: 56ch; }
+body.home .bp-slot .wp-block-columns.bp-grid-3 > .wp-block-column > .bp-panel:has(> .wp-block-quote) { padding: 32px !important; height: 100%; }
+body.home .bp-grid-3 .bp-panel > .wp-block-quote { display: flex; flex-direction: column; height: 100%; margin: 0; padding: 0; border: 0; }
+body.home .bp-grid-3 .bp-panel > .wp-block-quote cite { margin-top: auto; padding-top: 24px; min-height: 58px; box-sizing: content-box; display: flex; align-items: center; font-size: 15px; line-height: 1.5; }
+body.home .bp-slot > .bp-reveal:first-child + .wp-block-columns.bp-grid-3 { margin-top: 48px; }
+body.home .bp-slot > .wp-block-columns.bp-grid-3 + p { margin-top: 32px; }
+
+/* A3 home "Things people ask": accordion items flush, 48/32 spacing */
+body.home .bp-measure > .wp-block-accordion { margin-top: 48px; }
+body.home .bp-measure > .wp-block-accordion > .wp-block-accordion-item { margin-top: 0; }
+body.home .bp-measure > .wp-block-accordion + p { margin-top: 32px; }
+
+/* A4 home "Local support": location card = 24px pad, 40px tile, 12px gaps, 2-line suburbs text */
+body.home .bp-grid-4 li.location .bp-panel { padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+body.home .bp-grid-4 li.location .bp-panel > * { margin: 0; }
+body.home .bp-grid-4 li.location .icon-tile { width: 40px; height: 40px; }
+body.home .bp-grid-4 li.location .card__text p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 25.5px; }
+
+/* A5 home "Make a difference": lede is 19px lede in HTML */
+body.home .bp-split-cols > .wp-block-column:first-child > .wp-block-heading + p.wp-block-paragraph:not([class*=font-size]) { font-size: 19px; line-height: 1.65; }
+
+/* A6 home "Getting started" steps: 8px title→text gap */
+:is(body.home, body.bp-page-careers) .bp-steps-row .step__title + p { margin-top: 8px; }
+
+/* A7 home SIL feature band: no stray 48px above slot; property card = 234 media + badge overlay + 16px gaps */
+body.home .bp-sil-feature > .cta__shape + .bp-slot { margin-top: 0; }
+body.home .bp-sil-feature .bp-card-light { position: relative; display: flex; flex-direction: column; gap: 16px; }
+body.home .bp-sil-feature .bp-card-light > * { margin-top: 0 !important; margin-bottom: 0; }
+body.home .bp-sil-feature .bp-card-light > .bp-media { margin: -24px -24px 8px !important; height: auto; min-height: 0; aspect-ratio: 16 / 10; box-sizing: border-box; }
+body.home .bp-sil-feature .bp-card-light > .bp-status { position: absolute; top: 16px; left: 16px; z-index: 2; }
+
+/* A8 home "Support that feels personal": split body uses 24px gaps (eyebrow/h2/lede) */
+body.home .bp-split-cols > .wp-block-column > .bp-reveal:has(> .bp-eyebrow) > * + * { margin-top: 24px; }
+
+/* A9 steps row below 900px: HTML stacks steps with the marker in a left rail (48px), 24px gap, 40px between steps */
+@media (max-width: 899.98px) {
+  :is(body.home, body.bp-page-careers) .wp-block-columns.bp-steps-row.bp-steps-row { gap: 0 !important; }
+  :is(body.home, body.bp-page-careers) .wp-block-columns.bp-steps-row.bp-steps-row > .wp-block-column { flex-basis: 100% !important; padding-bottom: 40px; }
+  :is(body.home, body.bp-page-careers) .wp-block-columns.bp-steps-row.bp-steps-row > .wp-block-column:last-child { padding-bottom: 0; }
+  :is(body.home, body.bp-page-careers) .bp-steps-row > .wp-block-column > .bp-reveal { display: grid; grid-template-columns: 48px minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: 24px; row-gap: 8px; align-content: start; }
+  :is(body.home, body.bp-page-careers) .bp-steps-row > .wp-block-column > .bp-reveal > * { margin: 0 !important; grid-column: 2; }
+  :is(body.home, body.bp-page-careers) .bp-steps-row > .wp-block-column > .bp-reveal > .bp-step-marker { grid-column: 1; grid-row: 1 / span 2; align-self: stretch; flex-direction: column; width: 48px; }
+  :is(body.home, body.bp-page-careers) .bp-steps-row > .wp-block-column > .bp-reveal > .step__title { padding-top: 8px; }
+  :is(body.home, body.bp-page-careers) .bp-steps-row > .wp-block-column:not(:last-child) .bp-step-marker::after { content: ""; position: absolute; top: 48px; bottom: -40px; left: 50%; width: 2px; transform: translateX(-50%); background: linear-gradient(to bottom, var(--wp--preset--color--sage-300), var(--wp--preset--color--sand-200)); }
+}
+
+/* A10 split head: 32px between text and link when stacked (HTML .section__head--split gap) */
+:is(body.home, body.bp-page-about, body.post-type-archive-service, body.bp-page-careers, body.bp-page-our-team, body.bp-page-sil) .bp-head-split { row-gap: 32px; }
+
+/* A11 home hero: trust list sits 12px lower (margin-top on top of 24px gap); media min-height 20rem / 26rem at 1024+ */
+body.home .bp-hero-home ul.tick-list.bp-free { margin-top: 36px !important; }
+body.home .bp-hero-home .bp-media { min-height: 20rem; }
+@media (min-width: 64rem) { body.home .bp-hero-home .bp-media { min-height: 26rem; } }
+/* 2026-09-29 responsive: min-height + aspect-ratio 3/2 forced the frame to 480px (390) / 624px (1024-1334) and overflowed the viewport. Cap to the column below 1335px, where bands.css lifts the cap. */
+@media (max-width: 1334.98px) { body.home .bp-hero-home .bp-media { max-width: 100%; } }
+
+/* A12 about "Meet the team" cards: 24px below portrait, 8px gaps, role 25.5 lh */
+body.bp-page-about li.team_member .bp-panel > .bp-media + .card__title { margin-top: 24px !important; }
+body.bp-page-about li.team_member .bp-panel > .card__role { margin-top: 8px !important; line-height: 1.7; }
+body.bp-page-about li.team_member .bp-panel > .card__role + .wp-block-post-excerpt { margin-top: 8px !important; }
+
+/* A13 about "Our story": prose rhythm (eyebrow 17/1.75, h2 +64, h2+p 16, p 1.75 lh) */
+body.bp-page-about .bp-measure > .bp-eyebrow.has-medium-font-size { line-height: 1.75; margin-top: 4px; }
+body.bp-page-about .bp-measure > .bp-eyebrow.has-medium-font-size + h2 { margin-top: 64px !important; }
+body.bp-page-about .bp-measure > .bp-eyebrow.has-medium-font-size ~ h2 + p { margin-top: 16px !important; }
+body.bp-page-about .bp-measure:has(> .bp-eyebrow.has-medium-font-size) > p:not(.bp-eyebrow) { line-height: 1.75; }
+
+/* A14 about "Six things": head 56ch + 48px to grid */
+body.bp-page-about .bp-slot > .bp-reveal:first-child:has(+ .bp-grid-2) { max-width: 56ch; }
+body.bp-page-about .bp-slot > .bp-reveal:first-child + .bp-grid-2 { margin-top: 48px; }
+
+/* A15 about mission/vision cards: 16px under icon tile */
+body.bp-page-about .bp-grid-2--flat .bp-panel--lg > .icon-tile + h2 { margin-top: 16px !important; }
+
+/* A16 split bodies with eyebrow wrapped in .bp-reveal: HTML .split__body gap 24px */
+:is(body.bp-page-about, body.post-type-archive-service, body.bp-page-careers, body.bp-page-our-team, body.bp-page-sil) .bp-split-cols > .wp-block-column > .bp-reveal:has(> .bp-eyebrow) > * + * { margin-top: 24px; }
+
+/* A17 accordions in my pages: items flush (border-separated), head→accordion 48px, accordion→link 32px */
+:is(body.home, body.bp-page-about, body.post-type-archive-service, body.bp-page-careers, body.bp-page-our-team, body.bp-page-sil) .bp-measure > .wp-block-accordion { margin-top: 48px !important; }
+:is(body.home, body.bp-page-about, body.post-type-archive-service, body.bp-page-careers, body.bp-page-our-team, body.bp-page-sil) .bp-measure > .wp-block-accordion > .wp-block-accordion-item { margin-top: 0 !important; }
+:is(body.home, body.bp-page-about, body.post-type-archive-service, body.bp-page-careers, body.bp-page-our-team, body.bp-page-sil) .bp-measure > .bp-head { margin-bottom: 0; }
+
+/* A18 services archive grid: 48px under head */
+body.post-type-archive-service .bp-head + .wp-block-query { margin-top: 48px !important; }
+body.post-type-archive-service .bp-head:has(+ .wp-block-query) { margin-bottom: 0; }
+
+/* A19 soft split CTA ("Looking for the right support"): stacked gap 48px (HTML .cta__inner gap) */
+@media (max-width: 781.98px) {
+  :is(body.home, body.post-type-archive-service, body.bp-page-sil) .bp-cta:not(.alignfull) > .bp-split-cols { gap: 48px !important; }
+}
+
+/* A20 empty button groups (unused slots) must not add a 24px flow gap */
+:is(body.home, body.bp-page-about, body.post-type-archive-service, body.bp-page-careers, body.bp-page-our-team, body.bp-page-sil) .wp-block-buttons:not(:has(.wp-block-button)) { display: none; }
+
+/* A21 careers "What you actually get": perk cards = 40px sage tile + 12px gaps, head 56ch + 48px */
+body.bp-page-careers .bp-slot > .bp-reveal:first-child:has(+ .bp-grid-3) { max-width: 56ch; }
+body.bp-page-careers .bp-slot > .bp-reveal:first-child + .bp-grid-3 { margin-top: 48px; }
+body.bp-page-careers .bp-grid-3 .bp-panel:has(> .perk__title) { display: flex; flex-direction: column; gap: 12px; height: 100%; }
+body.bp-page-careers .bp-grid-3 .bp-panel:has(> .perk__title) > * { margin: 0 !important; }
+body.bp-page-careers .bp-grid-3 .bp-panel:has(> .perk__title)::before { content: ""; display: block; width: 40px; height: 40px; border-radius: var(--wp--custom--radius--sm, 8px); background: var(--wp--preset--color--sage-100); }
+body.bp-page-careers .bp-grid-3 .bp-panel > .perk__title + p { line-height: 1.6; }
+
+/* A22 careers job rows: HTML meta row is badge-height (29px) + card 113px */
+body.bp-page-careers li.job .bp-panel .job-meta { min-height: 29px; display: flex; align-items: center; }
+@media (max-width: 40rem) {
+  body.bp-page-careers li.job .bp-panel > .card__cta { margin-top: 16px !important; }
+}
+
+/* A23 sil page */
+/* "What is SIL": split body gap 24px */
+body.bp-page-sil .bp-split-cols > .wp-block-column:has(> .bp-eyebrow) > * + * { margin-top: 24px; }
+/* section heads 56ch, 48px to content */
+body.bp-page-sil .bp-slot > .bp-reveal:first-child:has(> .bp-eyebrow):not(.bp-head-split) { max-width: 56ch; }
+body.bp-page-sil .bp-slot > .bp-reveal:first-child:has(> .bp-eyebrow):not(.bp-head-split) + * { margin-top: 48px; }
+/* "Support that comes with the home": feature rows (24px icon, 16px gap, title mb 4, text 1.65) */
+body.bp-page-sil .bp-grid-2 .bp-reveal:has(> .benefit__icon) > .benefit__icon { width: 24px; height: 24px; min-width: 24px; margin-top: 3px; font-size: 15px; line-height: 24px; background: none; }
+body.bp-page-sil .bp-grid-2 .bp-reveal:has(> .benefit__icon) > .benefit__title { margin-bottom: 4px; }
+body.bp-page-sil .bp-grid-2 .bp-reveal:has(> .benefit__icon) > .has-small-font-size { line-height: 1.65; }
+/* "How we match": step body top padding 8px, marker rail stretches */
+body.bp-page-sil .bp-steps-stack > .bp-reveal { align-items: flex-start !important; }
+body.bp-page-sil .bp-steps-stack > .bp-reveal > .bp-step-marker { margin-top: 0; }
+body.bp-page-sil .bp-steps-stack > .bp-reveal > .wp-block-group:not(.bp-step-marker) { padding-top: 8px; }
+body.bp-page-sil .bp-grid-2 .wp-block-group:has(> .benefit__icon:not(.bp-icon)) { grid-template-columns: 24px minmax(0, 1fr); }
+body.bp-page-sil .bp-grid-2 .wp-block-group > .benefit__icon:not(.bp-icon) { color: var(--wp--preset--color--sage-600); }
+
+/* A24 trust strip (home, about): HTML items carry a 24px sage icon beside title+text (12px gap); GB markup has none -> paint via existing bp-icon masks */
+body.home .bp-trust-strip .wp-block-column > .bp-reveal:has(> .trust-strip__title) { display: grid; grid-template-columns: 24px minmax(0, 1fr); column-gap: 12px; align-items: start; }
+body.home .bp-trust-strip .wp-block-column > .bp-reveal:has(> .trust-strip__title) > * { grid-column: 2; }
+body.home .bp-trust-strip .wp-block-column > .bp-reveal:has(> .trust-strip__title)::before {
+  content: ""; grid-column: 1; grid-row: 1 / span 2; width: 24px; height: 24px; margin-top: 2px;
+  background-color: var(--wp--preset--color--sage-600);
+  -webkit-mask: var(--bp-icon) center / contain no-repeat; mask: var(--bp-icon) center / contain no-repeat;
+}
+body.home .bp-trust-strip .wp-block-column:nth-child(1) > .bp-reveal:not([class*="bp-icon--"]) { --bp-icon: var(--bp-icon-user); }
+body.home .bp-trust-strip .wp-block-column:nth-child(2) > .bp-reveal:not([class*="bp-icon--"]) { --bp-icon: var(--bp-icon-map-pin); }
+body.home .bp-trust-strip .wp-block-column:nth-child(3) > .bp-reveal:not([class*="bp-icon--"]) { --bp-icon: var(--bp-icon-clock); }
+body.home .bp-trust-strip .wp-block-column:nth-child(4) > .bp-reveal:not([class*="bp-icon--"]) { --bp-icon: var(--bp-icon-compass); }
+
+/* A25 sil "Homes with vacancies now": property cards (same markup as SIL archive) — mirror archive card rules */
+body.bp-page-sil .card--property {
+	display: flex; flex-direction: column; gap: 1rem; padding: 0 0 1.5rem; overflow: hidden; height: 100%;
+}
+body.bp-page-sil .card--property > * { margin: 0 !important; padding-inline: 1.5rem; }
+body.bp-page-sil .card--property > .bp-media {
+	padding: 0; margin: 0 0 .5rem !important; border-radius: 0; border: 0;
+	border-bottom: 1px solid var(--wp--custom--color--border);
+}
+body.bp-page-sil .card--property .card__badge {
+	position: absolute; top: 1rem; left: 1rem; z-index: 2; padding: 5px 10px;
+	font-size: .8125rem; font-weight: 600; line-height: 1.3; letter-spacing: .02em; text-transform: none;
+	border-radius: 6px; border: 1px solid transparent; gap: .375rem;
+	background: var(--wp--preset--color--forest-100, #DCE9E1); color: var(--wp--preset--color--forest-700);
+}
+body.bp-page-sil .card--property .card__badge::before { width: 7px; height: 7px; inline-size: 7px; block-size: 7px; background-color: currentColor; }
+body.bp-page-sil :is(.sil_status-available, .sil_status-1-vacancy) .card__badge { background: #E3EDE3; color: #2C6049; }
+body.bp-page-sil .sil_status-limited .card__badge { background: #FBF0DC; color: #8A5A12; }
+body.bp-page-sil .sil_status-full .card__badge { background: var(--wp--preset--color--sand-100); color: var(--wp--custom--color--text-muted); border-color: var(--wp--custom--color--border); }
+body.bp-page-sil .card--property .card__meta,
+body.bp-page-sil .card--property .card__meta a { color: var(--wp--custom--color--text-muted); text-decoration: none; font-size: .9375rem; }
+body.bp-page-sil .card--property .card__text p { margin: 0; font-size: .9375rem; line-height: 1.65; color: var(--wp--custom--color--text-muted); }
+body.bp-page-sil .card--property .card__specs {
+	margin-top: auto !important; margin-inline: 1.5rem !important; padding: 1rem 0 0; font-size: .9375rem; color: var(--wp--custom--color--text-muted);
+}
+body.bp-page-sil .card--property .bp-media__label { line-height: 1.45; color: var(--wp--preset--color--forest-700); }
+
+/* A26 careers job cards: location/type/pay as wrapping badges (HTML .job-meta .badge) */
+body.bp-page-careers .type-job p.job-meta { display: none !important; }
+body.bp-page-careers .type-job .job-badges { grid-area: meta; display: flex; flex-wrap: wrap; gap: 12px; min-height: 0 !important; font-size: 13px; font-weight: 600; }
+body.bp-page-careers .type-job .job-badges > * { margin: 0 !important; }
+body.bp-page-careers .type-job .job-badges .badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; font-size: 13px; font-weight: 600; letter-spacing: .02em; line-height: 1.3; border-radius: var(--wp--custom--radius--sm, 8px); border: 1px solid transparent; }
+body.bp-page-careers .type-job .job-badges .badge a { color: inherit; text-decoration: none; pointer-events: none; }
+body.bp-page-careers .type-job .job-badges .badge--outline { background: transparent; border-color: #D8CEBD; color: var(--wp--custom--color--text-muted); }
+body.bp-page-careers .type-job .job-badges .badge--accent { background: #F7E7DE; color: #8F4327; }
+body.bp-page-careers .type-job .job-badges .bp-icon { --bp-icon-size: 14px; --bp-icon-gap: 0px; }
+body.bp-page-careers .type-job .job-badges .bp-icon::before { width: 14px; height: 14px; margin: 0; }
+
+/* A27 careers/sil page hero (split lead): eyebrow→h1→lede 16px (HTML .page-hero__body gap) */
+:is(body.bp-page-about, body.bp-page-careers, body.bp-page-sil) .bp-page-hero .bp-split-cols--lead > .wp-block-column:first-child > .bp-reveal > :is(h1, h1 + p) { margin-top: 16px !important; }
+
+/* A28 split-head text link (link-arrow) paragraph: no extra margins */
+:is(body.home, body.bp-page-careers, body.bp-page-sil) .bp-head-split > .bp-link-arrow-p { margin: 0; }
+
+/* A29 home "Local support": HTML card shows the bare suburb list; GB excerpt is "Also serving <suburbs>" -> hide the fixed prefix (85px @15px Figtree) so the list wraps like HTML */
+body.home .bp-grid-4 li.location:not(.post-55) .card__text p { text-indent: -5.667em; overflow: hidden; }
+
+/* A30 home SIL feature cards: HTML badge ("1 vacancy", 13px/600 6px radius), specs = bedrooms + access with 18px icons */
+body.home .bp-sil-feature .bp-card-light > .card__badge { position: absolute; top: 16px; left: 16px; z-index: 2; display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; font-size: 13px; font-weight: 600; line-height: 1.3; letter-spacing: .02em; text-transform: none; border-radius: 6px; border: 1px solid transparent; background: #E3EDE3; color: #2C6049; }
+body.home .bp-sil-feature .bp-card-light > .card__badge::before { width: 7px; height: 7px; inline-size: 7px; block-size: 7px; background-color: currentColor; }
+body.home .bp-sil-feature .sil_status-limited .bp-card-light > .card__badge { background: #FBF0DC; color: #8A5A12; }
+body.home .bp-sil-feature .bp-card-light > .card__specs { display: flex; flex-wrap: wrap; column-gap: 16px; row-gap: 16px; margin-top: auto !important; padding-top: 16px; border-top: 1px solid var(--wp--custom--color--border); }
+body.home .bp-sil-feature .bp-card-light > .card__specs > .card__spec { margin: 0; display: inline-flex; align-items: center; gap: 8px; font-size: 15px; line-height: 1.7; color: var(--wp--custom--color--text-muted); --bp-icon-size: 18px; --bp-icon-gap: 0px; }
+body.home .bp-sil-feature .bp-card-light > .card__specs > .card__spec::before { background-color: var(--wp--preset--color--sage-600); }
+body.home .bp-sil-feature .bp-card-light > .card__specs > .card__spec--beds::after { content: "\a0 bedrooms"; margin-left: -8px; }
+
+/* A31 our-team cards: role line 15px/1.7 (25.5) like HTML .card__role */
+body.bp-page-our-team li.team_member .bp-panel > .card__role { line-height: 1.7; }

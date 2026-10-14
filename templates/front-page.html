@@ -1,0 +1,12 @@
+<!-- The front page.
+     Same shell as page-no-title: the title lives in the hero band, so this
+     template prints no core/post-title. WordPress prefers front-page.html
+     over page.html whenever a static page is set as the front page, so the
+     home page needs no per-page template selection. -->
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+
+<!-- wp:group {"tagName":"main","style":{"spacing":{"blockGap":"var:preset|spacing|60"}},"layout":{"type":"constrained"}} -->
+<main class="wp-block-group"><!-- wp:post-content {"align":"full","style":{"spacing":{"blockGap":"0"}},"layout":{"type":"constrained"}} /--></main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->

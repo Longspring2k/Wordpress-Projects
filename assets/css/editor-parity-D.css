@@ -1,0 +1,63 @@
+/* editor parity lane D: form previews (canvas only; never loaded on the front) */
+
+/* forms.js activates step 1 only; .bp-js (which hides the rest) is absent in the editor. */
+.bp-form-preview .form-step:not(.is-active) { display: none; }
+
+/* The preview is inert: keep it from ever looking interactive. */
+.bp-form-preview form { pointer-events: none; }
+.bp-form-preview .bp-hp { display: none; }
+.bp-form-preview__loading { margin: 0; padding: 24px; color: #757575; }
+
+/* The editor iframe also carries core's wp-admin forms.css, which restyles bare
+   input/select/textarea (2px radius, 40px min-height, greyed :disabled). The
+   front never loads it, so restore the theme values from forms.css here. */
+.bp-form-preview form :is(input.input, select.select, textarea.textarea) {
+	margin: 0;
+	box-shadow: none;
+	padding: 0.75rem 0.875rem;
+	min-height: 48px;
+	font-size: var(--wp--preset--font-size--medium);
+	color: var(--wp--custom--color--text);
+	background-color: var(--wp--custom--color--surface);
+	border: 1.5px solid var(--wp--custom--color--border-strong);
+	border-radius: var(--wp--custom--radius--md);
+}
+.bp-form-preview form textarea.textarea { min-height: 140px; }
+.bp-form-preview form select.select { padding-right: 2.75rem; }
+.bp-form-preview form input.check__input {
+	display: block;
+	width: 1px !important;
+	height: 1px !important;
+	margin: 3px 0 3px !important;
+	padding: 0;
+	text-align: start;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	color: inherit;
+	box-shadow: none;
+	line-height: normal;
+	font-size: 13.3333px;
+}
+
+.bp-form-preview form input.upload__input { font-size: 13.3333px; }
+
+/* Media frames in the canvas: core/image wraps the <img> in a resizable box
+   (and, while selected, a crop area) sized to the photo's own ratio, so a
+   16:9 photo in a 3:2 frame stopped short and the frame's soft background
+   showed underneath. On the front end the img fills the frame with
+   object-fit: cover (bands.css 13.x); make every wrapper fill it here too. */
+.editor-styles-wrapper .bp-media:has(img[src]) > .wp-block-image,
+.editor-styles-wrapper .bp-media:has(img[src]) > .wp-block-image > div,
+.editor-styles-wrapper .bp-media:has(img[src]) .components-resizable-box__container {
+	width: 100% !important;
+	height: 100% !important;
+	max-width: none !important;
+	margin: 0 !important;
+}
+.editor-styles-wrapper .bp-media:has(img[src]) img {
+	width: 100% !important;
+	height: 100% !important;
+	object-fit: cover !important;
+	aspect-ratio: auto !important;
+}

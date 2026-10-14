@@ -1,0 +1,65 @@
+/* Design parity (theme agent C). Visual glue for the archive/single/search
+   sections added to match the static design. */
+
+/* Accordion: icon span is empty now; the mask in bands.css paints the plus. */
+.wp-block-accordion-heading__toggle-icon:empty { min-width: 24px; }
+
+/* Card foot links */
+.card__foot, .card__cta { margin-top: auto; font-weight: 600; font-size: var(--wp--preset--font-size--small); }
+.card__foot a, .card__cta a { color: var(--wp--preset--color--forest-700); text-decoration: none; }
+.card__foot a::after { content: " \2192"; }
+.card__cta a { display: inline-block; padding: .4em 1em; border: 2px solid currentColor; border-radius: 999px; }
+.job-meta { color: var(--wp--preset--color--ink-600, inherit); }
+
+/* Chips */
+.chip-row { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: var(--wp--preset--spacing--60); }
+.chip { display: inline-flex; align-items: center; padding: .45em 1em; border-radius: 999px; border: 1px solid var(--wp--custom--color--border, #d9d2c5); background: #fff; color: inherit; text-decoration: none; font-size: var(--wp--preset--font-size--small); }
+.chip[aria-current="page"], .chip:hover { background: var(--wp--preset--color--forest-700); border-color: var(--wp--preset--color--forest-700); color: #fff; }
+
+/* SIL filters */
+.filters { background: var(--wp--preset--color--sand-100); border-radius: var(--wp--custom--radius--lg, 16px); padding: var(--wp--preset--spacing--50); margin-bottom: var(--wp--preset--spacing--60); }
+.filters__head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.filters__title { margin: 0; font-size: var(--wp--preset--font-size--heading-3); }
+.filters__grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 1rem; }
+.filters__foot { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; gap: 1rem; flex-wrap: wrap; }
+.filters__toggle, .bp-filter__reset { background: none; border: 2px solid currentColor; border-radius: 999px; padding: .35em 1em; font: inherit; font-size: var(--wp--preset--font-size--small); cursor: pointer; }
+.card__badge { align-self: flex-start; }
+
+/* Empty states */
+.empty-state { text-align: center; padding: var(--wp--preset--spacing--60); border: 1px dashed var(--wp--custom--color--border, #d9d2c5); border-radius: var(--wp--custom--radius--lg, 16px); }
+.empty-state .wp-block-buttons, .empty-state .actions { justify-content: center; }
+
+/* 404 */
+.error-page__inner { text-align: center; max-width: 760px; margin-inline: auto; }
+.error-page__inner .wp-block-buttons { justify-content: center; }
+.error-page__links { display: flex; justify-content: center; flex-wrap: wrap; gap: 1.5rem; }
+
+/* Search results */
+.result { padding-bottom: var(--wp--preset--spacing--40); border-bottom: 1px solid var(--wp--custom--color--border, #e4ddd0); }
+.result__type { margin: 0; }
+.search-count { margin: 0; }
+
+/* Resource TOC */
+.bp-toc { background: var(--wp--preset--color--sand-100); border-radius: var(--wp--custom--radius--md, 10px); padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--50); margin-bottom: var(--wp--preset--spacing--60); }
+.bp-toc .toc__title { font-weight: 700; margin: 0 0 .5rem; }
+.bp-toc .toc__list { margin: 0; padding-left: 1.1rem; }
+.bp-toc a { color: var(--wp--preset--color--forest-700); }
+
+/* SIL overview */
+.spec-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 0; }
+.spec-list__row { background: var(--wp--preset--color--sand-100); border-radius: var(--wp--custom--radius--md, 10px); padding: 1rem; }
+.spec-list dt { font-size: var(--wp--preset--font-size--x-small); text-transform: uppercase; letter-spacing: .06em; }
+.spec-list dd { margin: 0; font-weight: 700; }
+
+/* Home hero call card */
+.hero__card { display: flex; gap: .75rem; align-items: center; background: #fff; border-radius: var(--wp--custom--radius--md, 10px); padding: .9rem 1.1rem; box-shadow: 0 10px 30px rgba(0,0,0,.08); margin-top: 1rem; }
+.hero__card-text { display: flex; flex-direction: column; }
+.hero__card a { color: inherit; }
+
+/* Choice hints */
+.check__title { display: block; font-weight: 600; }
+.check__hint { display: block; font-size: var(--wp--preset--font-size--small); opacity: .8; }
+
+/* FAQ search */
+.bp-faq-search { margin-bottom: var(--wp--preset--spacing--60); }
+.bp-faq-empty { margin-bottom: var(--wp--preset--spacing--60); }

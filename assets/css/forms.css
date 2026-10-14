@@ -1,0 +1,1033 @@
+/*
+ * Bright Path -- forms.
+ *
+ * OWNER: the forms track. Last shard in the cascade:
+ * global-styles -> foundation -> bands -> posts -> forms.
+ *
+ * Every colour, radius, shadow and transition is a token. There is no hex in
+ * this file: a hard-coded value here defeats the point of the token layer, and
+ * the two error colours the design needs already exist as
+ * --wp--custom--status--error / --error-bg.
+ */
+
+/* ---------------------------------------------------------------
+ * 1. The form shell
+ * --------------------------------------------------------------- */
+
+.bp-form-wrap {
+	max-width: var(--wp--custom--container--narrow);
+	margin-inline: auto;
+}
+
+.form {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wp--preset--spacing--50);
+}
+
+.form__actions {
+	margin-top: var(--wp--preset--spacing--30);
+}
+
+/* ---------------------------------------------------------------
+ * 2. A field
+ * --------------------------------------------------------------- */
+
+.field {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wp--preset--spacing--10);
+}
+
+.field__label,
+.field__group > legend {
+	font-weight: 600;
+	color: var(--wp--custom--color--text);
+}
+
+/* main.css 1268: 32px upload icon above the title. */
+.upload::before {
+	content: "";
+	width: 32px;
+	height: 32px;
+	background-color: var(--wp--preset--color--terracotta-600, currentColor);
+	-webkit-mask: var(--bp-icon-upload) center / contain no-repeat;
+	mask: var(--bp-icon-upload) center / contain no-repeat;
+}
+
+.field__required {
+	color: var(--wp--custom--status--error);
+}
+
+.field__hint {
+	margin: 0;
+	color: var(--wp--custom--color--text-muted);
+	font-size: var(--wp--preset--font-size--small);
+	line-height: 1.5;
+}
+
+.input,
+.select,
+.textarea {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 0.7em 0.9em;
+	font: inherit;
+	font-size: var(--wp--preset--font-size--small);
+	color: var(--wp--custom--color--text);
+	background-color: var(--wp--custom--color--surface);
+	border: 1px solid var(--wp--custom--color--border-strong);
+	border-radius: var(--wp--custom--radius--md);
+	transition: border-color var(--wp--custom--transition--fast), box-shadow var(--wp--custom--transition--fast);
+}
+
+.textarea {
+	resize: vertical;
+	min-height: 6em;
+	line-height: 1.6;
+}
+
+.select {
+	appearance: none;
+	padding-right: 2.4em;
+	background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+	background-position: calc(100% - 1.1em) 1.15em, calc(100% - 0.75em) 1.15em;
+	background-size: 0.36em 0.36em, 0.36em 0.36em;
+	background-repeat: no-repeat;
+}
+
+.input:hover,
+.select:hover,
+.textarea:hover {
+	border-color: var(--wp--custom--color--border-hover);
+}
+
+/*
+ * Focus is a visible ring, never `outline: none`. These forms are the site's
+ * keyboard-heaviest surface and this is a disability services provider.
+ */
+.input:focus-visible,
+.select:focus-visible,
+.textarea:focus-visible,
+.check__input:focus-visible + .check__mark,
+.upload:focus-within {
+	outline: 2px solid var(--wp--custom--color--focus);
+	outline-offset: 2px;
+	border-color: var(--wp--custom--color--focus);
+}
+
+/* ---------------------------------------------------------------
+ * 3. Errors
+ * --------------------------------------------------------------- */
+
+.field__error {
+	display: none;
+	margin: 0;
+	align-items: center;
+	gap: 0.4em;
+	color: var(--wp--custom--status--error);
+	font-size: var(--wp--preset--font-size--x-small);
+	line-height: 1.5;
+}
+
+/*
+ * The error node is always in the DOM and is revealed by content, so screen
+ * readers announce a change inside a node that already existed rather than the
+ * arrival of a new one.
+ */
+.field--invalid .field__error,
+.field__error.is-visible {
+	display: flex;
+}
+
+.field--invalid .input,
+.field--invalid .select,
+.field--invalid .textarea,
+[aria-invalid="true"].input,
+[aria-invalid="true"].select,
+[aria-invalid="true"].textarea {
+	border-color: var(--wp--custom--status--error);
+	background-color: var(--wp--custom--status--error-bg);
+}
+
+/* ---------------------------------------------------------------
+ * 4. The error summary -- focusable, and focused
+ * --------------------------------------------------------------- */
+
+.form-summary {
+	padding: var(--wp--preset--spacing--30);
+	border: 2px solid var(--wp--custom--status--error);
+	border-radius: var(--wp--custom--radius--md);
+	background-color: var(--wp--custom--status--error-bg);
+	color: var(--wp--custom--color--text);
+}
+
+.form-summary:focus-visible {
+	outline: 2px solid var(--wp--custom--color--focus);
+	outline-offset: 2px;
+}
+
+.form-summary__title {
+	margin: 0 0 var(--wp--preset--spacing--10);
+	font-weight: 700;
+}
+
+.form-summary__list {
+	margin: 0;
+	padding-left: 1.2em;
+}
+
+.form-summary__list a {
+	color: var(--wp--custom--status--error);
+}
+
+.form-summary--fatal .form-summary__title {
+	margin: 0;
+	font-weight: 600;
+}
+
+/* ---------------------------------------------------------------
+ * 5. Checkboxes and radios
+ * --------------------------------------------------------------- */
+
+.field__group {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--wp--preset--spacing--10);
+}
+
+.check {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 0.7em;
+	align-items: start;
+	cursor: pointer;
+	font-size: var(--wp--preset--font-size--small);
+	line-height: 1.5;
+	color: var(--wp--custom--color--text-body);
+}
+
+/* The native input stays in the accessibility tree; it is only visually
+   replaced by .check__mark. clip-path rather than display:none, which would
+   remove it from the tab order entirely. */
+.check__input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+.check__mark {
+	inline-size: 1.25em;
+	block-size: 1.25em;
+	margin-top: 0.15em;
+	border: 1px solid var(--wp--custom--color--border-strong);
+	border-radius: var(--wp--custom--radius--sm);
+	background-color: var(--wp--custom--color--surface);
+	display: grid;
+	place-items: center;
+	transition: background-color var(--wp--custom--transition--fast), border-color var(--wp--custom--transition--fast);
+}
+
+.check input[type="radio"] + .check__mark {
+	border-radius: var(--wp--custom--radius--full);
+}
+
+.check__input:checked + .check__mark {
+	background-color: var(--wp--custom--color--primary);
+	border-color: var(--wp--custom--color--primary);
+}
+
+.check__input:checked + .check__mark::after {
+	content: "";
+	inline-size: 0.42em;
+	block-size: 0.72em;
+	border: solid var(--wp--preset--color--white);
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg) translate(-4%, -12%);
+}
+
+.check input[type="radio"]:checked + .check__mark::after {
+	inline-size: 0.5em;
+	block-size: 0.5em;
+	border: 0;
+	border-radius: var(--wp--custom--radius--full);
+	background-color: var(--wp--preset--color--white);
+	transform: none;
+}
+
+/* ---------------------------------------------------------------
+ * 6. Upload
+ * --------------------------------------------------------------- */
+
+.upload {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--wp--preset--spacing--30); /* main.css 1252: space-3 */
+	padding: var(--wp--preset--spacing--70) var(--wp--preset--spacing--50); /* space-7 / space-5 */
+	text-align: center;
+	border: 2px dashed var(--wp--custom--color--border-strong);
+	border-radius: var(--wp--custom--radius--lg, 16px);
+	background-color: var(--wp--custom--color--bg-soft);
+	cursor: pointer;
+	transition: border-color var(--wp--custom--transition--fast), background-color var(--wp--custom--transition--fast);
+}
+
+.upload:hover,
+.upload.is-dragover {
+	border-color: var(--wp--custom--color--border-hover);
+	background-color: var(--wp--custom--color--bg-soft);
+}
+
+.upload__input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+}
+
+.upload__title {
+	font-weight: 600;
+	color: var(--wp--custom--color--text);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.upload__hint {
+	color: var(--wp--custom--color--text-muted);
+	font-size: var(--wp--preset--font-size--x-small);
+}
+
+.upload__list {
+	margin-top: 0.4em;
+	color: var(--wp--custom--color--text-body);
+	font-size: var(--wp--preset--font-size--x-small);
+}
+
+/* ---------------------------------------------------------------
+ * 7. Success
+ * --------------------------------------------------------------- */
+
+.form-success {
+	padding: var(--wp--preset--spacing--60);
+	border-radius: var(--wp--custom--radius--lg);
+	background-color: var(--wp--custom--color--success-bg);
+	box-shadow: var(--wp--custom--shadow--sm);
+	text-align: center;
+}
+
+.form-success:focus-visible {
+	outline: 2px solid var(--wp--custom--color--focus);
+	outline-offset: 2px;
+}
+
+.form-success__title {
+	margin: 0 0 var(--wp--preset--spacing--20);
+	font-size: var(--wp--preset--font-size--heading-3);
+}
+
+.form-success__body {
+	margin: 0;
+	color: var(--wp--custom--color--text-body);
+}
+
+/* ---------------------------------------------------------------
+ * 8. The honeypot
+ *
+ * Off-canvas rather than display:none. It must not be announced, must not be
+ * reachable by tab, and must still be a real field a naive bot will fill.
+ * --------------------------------------------------------------- */
+
+.bp-hp {
+	position: absolute !important;
+	left: -9999px !important;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+/* ---------------------------------------------------------------
+ * 9. The referral stepper
+ * --------------------------------------------------------------- */
+
+.stepper {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wp--preset--spacing--20);
+}
+
+.stepper__progress-text {
+	margin: 0;
+	font-weight: 600;
+	font-size: var(--wp--preset--font-size--x-small);
+	color: var(--wp--custom--color--text-muted);
+}
+
+.stepper__bar {
+	block-size: 6px;
+	border-radius: var(--wp--custom--radius--full);
+	background-color: var(--wp--custom--color--border);
+	overflow: hidden;
+}
+
+.stepper__fill {
+	display: block;
+	block-size: 100%;
+	inline-size: 0%;
+	border-radius: var(--wp--custom--radius--full);
+	background-color: var(--wp--custom--color--primary);
+	transition: inline-size var(--wp--custom--transition--base);
+}
+
+.stepper__dots {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--wp--preset--spacing--20);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.stepper__dot {
+	display: flex;
+	align-items: center;
+	gap: 0.45em;
+	font-size: var(--wp--preset--font-size--x-small);
+	color: var(--wp--custom--color--text-subtle);
+}
+
+.stepper__dot-mark {
+	display: grid;
+	place-items: center;
+	inline-size: 1.7em;
+	block-size: 1.7em;
+	border-radius: var(--wp--custom--radius--full);
+	background-color: var(--wp--custom--color--border);
+	color: var(--wp--custom--color--text-body);
+	font-weight: 700;
+}
+
+.stepper__dot.is-current {
+	color: var(--wp--custom--color--text);
+	font-weight: 600;
+}
+
+.stepper__dot.is-current .stepper__dot-mark,
+.stepper__dot.is-done .stepper__dot-mark {
+	background-color: var(--wp--custom--color--primary);
+	color: var(--wp--preset--color--white);
+}
+
+/*
+ * Steps. With JavaScript OFF every step is visible and the form is one long
+ * page that still submits -- the no-JS path is a working form, not a broken
+ * one. Only .bp-js hides the inactive steps, exactly as the reveal layer
+ * scopes its opacity:0.
+ */
+.form-step {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wp--preset--spacing--50);
+}
+
+.bp-js .form-step {
+	display: none;
+}
+
+.bp-js .form-step.is-active {
+	display: flex;
+}
+
+.form-step__head h2 {
+	margin: 0;
+	font-size: var(--wp--preset--font-size--heading-3);
+}
+
+.form-step__nav {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: var(--wp--preset--spacing--20);
+	margin-top: var(--wp--preset--spacing--20);
+}
+
+.form-step__nav-right {
+	margin-left: auto;
+}
+
+/* ---------------------------------------------------------------
+ * 10. Dependent fields
+ * --------------------------------------------------------------- */
+
+.bp-js .field[data-depends][hidden],
+.field[data-depends][hidden] {
+	display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.input,
+	.select,
+	.textarea,
+	.check__mark,
+	.upload,
+	.stepper__fill {
+		transition: none;
+	}
+}
+
+
+/* ===============================================================
+ * 11. Design parity -- brightpath-html main.css 1121-1306 and
+ *     pages.css 259-273 / 433-458 (measured in a real browser at
+ *     1440 and 390). Later in the file, so these win over 1-10.
+ * =============================================================== */
+
+/* Field rhythm: main.css .field gap var(--space-2) = 8px. */
+.field {
+	gap: var(--wp--preset--spacing--20);
+}
+
+.field__required {
+	color: var(--wp--custom--color--accent);
+	margin-inline-start: 2px;
+}
+
+/* .field__hint is --text-sm (15px), not 13px. */
+.field__hint {
+	font-size: var(--wp--preset--font-size--small);
+}
+
+/* .input/.select/.textarea: 17px, 12px 14px, 1.5px border, 48px min. */
+.input,
+.select,
+.textarea {
+	min-height: 48px;
+	padding: 0.75rem 0.875rem;
+	font-size: var(--wp--preset--font-size--medium);
+	line-height: 1.5;
+	border-width: 1.5px;
+	transition: border-color var(--wp--custom--transition--fast), box-shadow var(--wp--custom--transition--fast), background-color var(--wp--custom--transition--fast);
+}
+
+.textarea {
+	min-height: 140px;
+	line-height: 1.6;
+}
+
+.select {
+	padding-right: 2.75rem;
+	background-position: calc(100% - 1.35em) 50%, calc(100% - 1em) 50%;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+	color: var(--wp--custom--color--text-subtle);
+}
+
+.input:hover,
+.select:hover,
+.textarea:hover {
+	border-color: var(--wp--preset--color--sage-500);
+}
+
+/* Focus: primary border + 3px 18% forest halo, and a 3px focus outline
+   at 1px offset (main.css 1147-1152). */
+.input:focus,
+.select:focus,
+.textarea:focus {
+	border-color: var(--wp--custom--color--primary);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--wp--custom--color--primary) 18%, transparent);
+}
+
+.input:focus-visible,
+.select:focus-visible,
+.textarea:focus-visible {
+	outline: 3px solid var(--wp--custom--color--focus);
+	outline-offset: 1px;
+	border-color: var(--wp--custom--color--primary);
+}
+
+/* Errors: 15px / 500, icon 18px, top-aligned (main.css 1176-1186). */
+.field__error {
+	align-items: flex-start;
+	gap: 0.375rem;
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 500;
+}
+
+.field__error-icon {
+	width: 18px;
+	height: 18px;
+	flex-shrink: 0;
+	margin-top: 3px;
+}
+
+.field--invalid .input:focus,
+.field--invalid .select:focus,
+.field--invalid .textarea:focus {
+	border-color: var(--wp--custom--status--error);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--wp--custom--status--error) 20%, transparent);
+}
+
+/* Error summary = .alert.alert--error (main.css 1401-1415). */
+.form-summary {
+	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--50);
+	border: 1px solid color-mix(in srgb, var(--wp--custom--status--error) 25%, transparent);
+	color: var(--wp--custom--status--error);
+	font-size: 1rem;
+	line-height: 1.6;
+}
+
+.form-summary__title {
+	margin: 0 0 var(--wp--preset--spacing--10);
+	font-weight: 600;
+}
+
+/* Two-column rows: .form__row--2 from 40rem up. */
+.form__row {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: var(--wp--preset--spacing--50);
+}
+
+@media (min-width: 40rem) {
+	.form__row--2 {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+/* Hidden dependent fields must not leave an empty grid track. */
+.form__row:not(:has(> .field:not([hidden]))) {
+	display: none;
+}
+
+/* ---- Choices: .choice / .choice--card (main.css 1189-1246) ---- */
+
+.field__group > legend {
+	padding: 0;
+	margin-bottom: var(--wp--preset--spacing--30);
+}
+
+.field__group {
+	gap: 0;
+}
+
+.field__options {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wp--preset--spacing--10);
+}
+
+.field__options--inline {
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: var(--wp--preset--spacing--40);
+}
+
+.field__options--grid-2,
+.field__options--grid-3 {
+	display: grid;
+	gap: var(--wp--preset--spacing--30);
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 56.25rem) {
+	.field__options--grid-3 {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 40rem) {
+	.field__options--grid-2,
+	.field__options--grid-3 {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+.check {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--wp--preset--spacing--30);
+	min-height: 44px;
+	padding: var(--wp--preset--spacing--30);
+	border-radius: var(--wp--custom--radius--md);
+	font-size: var(--wp--preset--font-size--medium);
+	line-height: 1.5;
+	transition: background-color var(--wp--custom--transition--fast);
+}
+
+.check:hover {
+	background-color: var(--wp--custom--color--bg-soft);
+}
+
+.check__mark {
+	flex-shrink: 0;
+	inline-size: 24px;
+	block-size: 24px;
+	margin-top: 2px;
+	border-width: 1.5px;
+	box-sizing: border-box;
+}
+
+.check:hover .check__mark {
+	border-color: var(--wp--preset--color--sage-500);
+}
+
+.check__input:focus-visible + .check__mark {
+	outline: 3px solid var(--wp--custom--color--focus);
+	outline-offset: 2px;
+}
+
+.check__text {
+	color: var(--wp--custom--color--text-body);
+}
+
+.check__title {
+	display: block;
+	font-weight: 600;
+	color: var(--wp--custom--color--text);
+}
+
+.check__hint {
+	display: block;
+	margin-top: 2px;
+	font-size: var(--wp--preset--font-size--small);
+	color: var(--wp--custom--color--text-muted);
+}
+
+/* Radio dot: inset 5px white disc; checkbox tick sized for 24px. */
+.check input[type="radio"]:checked + .check__mark::after {
+	inline-size: 11px;
+	block-size: 11px;
+}
+
+.check__input:checked + .check__mark::after {
+	inline-size: 6px;
+	block-size: 11px;
+}
+
+.check--card {
+	padding: var(--wp--preset--spacing--40);
+	border: 1.5px solid var(--wp--custom--color--border-strong);
+	background-color: var(--wp--custom--color--surface);
+}
+
+.check--card:has(.check__input:checked) {
+	border-color: var(--wp--custom--color--primary);
+	background-color: var(--wp--preset--color--forest-100);
+}
+
+.check--card:has(.check__input:focus-visible) {
+	outline: 3px solid var(--wp--custom--color--focus);
+	outline-offset: 2px;
+}
+
+.field--invalid .check--card {
+	border-color: var(--wp--custom--status--error);
+}
+
+/* ---- .btn is global now (foundation.css 21a, main.css 494-550). Only the
+ *      focus ring stays here. ---- */
+
+.form .btn:focus-visible {
+	outline: 3px solid var(--wp--custom--color--focus);
+	outline-offset: 2px;
+}
+
+.form__actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--wp--preset--spacing--40);
+	margin-top: 0;
+	padding-top: var(--wp--preset--spacing--20);
+}
+
+/* ---- Referral stepper (pages.css 433-458) ---- */
+
+.stepper {
+	gap: 0;
+	margin-bottom: var(--wp--preset--spacing--70);
+}
+
+.stepper__progress-text {
+	margin-bottom: var(--wp--preset--spacing--30);
+	font-size: var(--wp--preset--font-size--small);
+	color: var(--wp--custom--color--text);
+}
+
+.stepper__bar {
+	background-color: var(--wp--preset--color--sand-200);
+}
+
+.stepper__fill {
+	background-color: var(--wp--custom--color--accent);
+}
+
+.stepper__dots {
+	display: none;
+	align-items: flex-start;
+	flex-wrap: nowrap;
+	gap: var(--wp--preset--spacing--20);
+	margin-top: var(--wp--preset--spacing--50);
+}
+
+@media (min-width: 56.25rem) {
+	.stepper__dots {
+		display: flex;
+	}
+}
+
+.stepper__dot {
+	flex: 1;
+	flex-direction: column;
+	gap: var(--wp--preset--spacing--20);
+	text-align: center;
+	font-size: var(--wp--preset--font-size--x-small);
+	line-height: 1.35;
+	color: var(--wp--custom--color--text-muted);
+}
+
+.stepper__dot-mark {
+	inline-size: 36px;
+	block-size: 36px;
+	box-sizing: border-box;
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 600;
+	color: var(--wp--custom--color--text-muted);
+	background-color: var(--wp--custom--color--surface);
+	border: 2px solid var(--wp--custom--color--border-strong);
+}
+
+.stepper__dot.is-current .stepper__dot-mark {
+	background-color: var(--wp--preset--color--forest-700);
+	border-color: var(--wp--preset--color--forest-700);
+	color: var(--wp--custom--color--text-invert);
+}
+
+.stepper__dot.is-done .stepper__dot-mark {
+	background-color: var(--wp--preset--color--sage-100);
+	border-color: var(--wp--preset--color--sage-500);
+	color: var(--wp--preset--color--sage-600);
+}
+
+.form-step__head h2 {
+	font-family: var(--wp--preset--font-family--fraunces);
+	font-size: var(--wp--preset--font-size--heading-2);
+	font-weight: 600;
+}
+
+/* Step nav: rule above, Continue right (prototype .form__foot in a step). */
+.form-step__nav {
+	margin-top: var(--wp--preset--spacing--30);
+	padding-top: var(--wp--preset--spacing--60);
+	border-top: 1px solid var(--wp--custom--color--border);
+}
+
+/* ---- Page layout: .detail-layout + .form-panel (pages.css 273/545,
+ *      main.css 1301). The four form pages ship the heading group, the
+ *      form and the aside cards as siblings of one .bp-measure group; the
+ *      heading + form become the white form panel, the rest the aside.
+ *      Scoped to these four forms only. ---- */
+
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form:is([data-bp-form="contact"], [data-bp-form="request-support"], [data-bp-form="referral"], [data-bp-form="feedback"])) {
+	--bp4-gap: clamp(2rem, 5vw, 3.5rem);
+	--bp4-pad: clamp(1.5rem, 4vw, 2.5rem);
+	/* theme.json contentSize: the prototype container is 1240 minus 2x32 pad. */
+	--wp--style--global--content-size: 1176px;
+	display: flow-root;
+}
+
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap {
+	max-width: none;
+	margin: 0;
+	padding: 0 var(--bp4-pad) var(--bp4-pad);
+	background-color: var(--wp--custom--color--surface);
+	border: 1px solid var(--wp--custom--color--border);
+	border-top: 0;
+	border-radius: 0 0 var(--wp--custom--radius--lg) var(--wp--custom--radius--lg);
+}
+
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > :first-child {
+	margin: 0;
+	padding: var(--bp4-pad) var(--bp4-pad) var(--wp--preset--spacing--60);
+	background-color: var(--wp--custom--color--surface);
+	border: 1px solid var(--wp--custom--color--border);
+	border-bottom: 0;
+	border-radius: var(--wp--custom--radius--lg) var(--wp--custom--radius--lg) 0 0;
+}
+
+/* No heading group above the form (the page hero carries it): the form is
+   both halves of the panel, so it gets the whole card -- all four borders,
+   all four corners, the full top padding. */
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap:first-child {
+	padding: var(--bp4-pad);
+	border: 1px solid var(--wp--custom--color--border);
+	border-radius: var(--wp--custom--radius--lg);
+}
+
+/* Aside cards: .sidebar-card -- 32px padding, sm shadow, 16px gap. */
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap ~ * {
+	max-width: none;
+	margin-block-start: var(--wp--preset--spacing--50);
+}
+
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap ~ .bp-panel:not(:has(> .bp-media)) {
+	padding: var(--wp--preset--spacing--60);
+	box-shadow: var(--wp--custom--shadow--sm);
+}
+
+@media (max-width: 56.1875rem) {
+	:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap ~ :first-of-type,
+	:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap + * {
+		margin-block-start: var(--bp4-gap);
+	}
+}
+
+@media (min-width: 56.25rem) {
+	/* 1.6fr / 0.9fr columns with the clamp gap. The panel floats left and
+	   the aside flows beside it from the top, so the two columns stack
+	   independently exactly as the prototype's grid with align-items:start. */
+	:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > :first-child,
+	:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap {
+		float: left;
+		clear: left;
+		box-sizing: border-box;
+		width: calc((100% - var(--bp4-gap)) * 1.6 / 2.5);
+	}
+
+	:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap ~ * {
+		margin-left: calc((100% - var(--bp4-gap)) * 1.6 / 2.5 + var(--bp4-gap)) !important;
+		margin-right: 0 !important;
+	}
+
+	:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap + * {
+		margin-block-start: 0;
+	}
+}
+
+/* ---- Aside cards (pages.css .sidebar-card / .step, main.css .alert).
+ *      Scoped to siblings after the form on the four form pages. ---- */
+
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap ~ .bp-panel:not(:has(> .bp-media)) {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wp--preset--spacing--40);
+}
+
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap ~ .bp-panel:not(:has(> .bp-media)) > * {
+	margin-block: 0;
+}
+
+/* .sidebar-card__title: Fraunces 22px / 600 / 1.14. */
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap ~ .bp-panel > h2.card__title {
+	font-family: var(--wp--preset--font-family--fraunces);
+	font-size: var(--wp--preset--font-size--x-large);
+	line-height: 1.14;
+}
+
+/* .h5 sub-heads ("What happens next", "What we will need", "Getting here"):
+   Figtree 17px / 600 / 1.4. */
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap ~ .bp-panel > h3 {
+	font-family: var(--wp--preset--font-family--figtree);
+	font-size: var(--wp--preset--font-size--medium);
+	font-weight: 600;
+	line-height: 1.4;
+}
+
+/* The hr separators the prototype draws above each sub-head: 1px border,
+   24px either side (margin 16 + card gap). */
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap ~ .bp-panel > h3:not(:first-child):not(.bp-media + h3) {
+	margin-top: var(--wp--preset--spacing--50);
+	padding-top: var(--wp--preset--spacing--50);
+	border-top: 1px solid var(--wp--custom--color--border);
+}
+
+/* Aside text is --text-sm body colour. */
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap ~ .bp-panel > p.has-small-font-size {
+	color: var(--wp--custom--color--text-body);
+	line-height: 1.7;
+}
+
+/* .btn--block: the aside buttons run the full card width, stacked 12px. */
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap ~ .bp-panel > .wp-block-buttons {
+	flex-direction: column;
+	align-items: stretch;
+	gap: var(--wp--preset--spacing--30);
+}
+
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap ~ .bp-panel > .wp-block-buttons > .wp-block-button,
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) > .bp-form-wrap ~ .bp-panel > .wp-block-buttons > .wp-block-button > .wp-block-button__link {
+	width: 100%;
+}
+
+/* Steps inside the aside: Fraunces number disc, 17px titles, 15px muted text,
+   40px rhythm (pages.css .step padding-bottom var(--space-7)). */
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) .bp-steps-stack .icon-tile {
+	font-family: var(--wp--preset--font-family--fraunces);
+}
+
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) .bp-steps-stack :is(h3, h4) {
+	font-size: var(--wp--preset--font-size--medium);
+	line-height: 1.3;
+}
+
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) .bp-steps-stack > .wp-block-group + .wp-block-group {
+	margin-block-start: var(--wp--preset--spacing--70);
+}
+
+/* Callouts become .alert: 16px 24px padding, radius-md, 16px/1.6 text.
+   Info (forest) on feedback + referral, warning on contact. */
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) .bp-callout {
+	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--50);
+	border-radius: var(--wp--custom--radius--md);
+	background-color: var(--wp--custom--color--info-bg);
+	border-color: color-mix(in srgb, var(--wp--custom--color--info) 20%, transparent);
+	color: var(--wp--custom--color--info);
+	font-size: 1rem;
+	line-height: 1.6;
+}
+
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) .bp-callout :is(.callout__title, .callout__body) {
+	color: inherit;
+	font-size: 1rem;
+	line-height: 1.6;
+}
+
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) .bp-callout .callout__title + .callout__body {
+	margin-block-start: var(--wp--preset--spacing--10);
+}
+
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form="contact"]) .bp-callout {
+	background-color: var(--wp--custom--status--warning-bg);
+	border-color: color-mix(in srgb, var(--wp--custom--status--warning) 25%, transparent);
+	color: var(--wp--custom--status--warning);
+}
+
+/* The referral's callout sits inside the card: .alert inside .sidebar-card
+   uses 12px 16px. */
+:is(.bp-measure, .bp-slot):has(> .bp-form-wrap > .form[data-bp-form]) .bp-panel > .bp-callout {
+	padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--40);
+}
+
+/* The prototype hr above the referral alert: 24px + rule + 24px. */
+.bp-panel > .tick-list + .bp-callout {
+	position: relative;
+	margin-top: calc(var(--wp--preset--spacing--50) + 1px) !important;
+}
+
+.bp-panel > .tick-list + .bp-callout::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: calc(-1 * var(--wp--preset--spacing--50) - 1px);
+	height: 1px;
+	background-color: var(--wp--custom--color--border);
+}

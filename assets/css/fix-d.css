@@ -1,0 +1,47 @@
+/* fix-d: parity pass D2 — service detail (8 posts), location-detail residuals, legal pages. */
+
+/* Service detail FAQ head: prototype .section__head--center { max-width: 60ch } (=660px at 17px) inside the 696 measure; accordion stays 696. */
+.bp-tpl--single-service .bp-measure > .bp-reveal:has(> h2) { max-width: 60ch !important; font-size: 17px; }
+
+/* Service detail related cards: the content already carries a "→" span; parity.css adds a second via ::after. */
+.bp-tpl--single-service .card__foot a > span[aria-hidden] { display: none; }
+
+/* Service detail breadcrumb: prototype is Home / Services / <service>; GB inserts the service_category term crumb. */
+.bp-tpl--single-service .wp-block-breadcrumbs li:has(> a[href*="/service-category/"]) { display: none; }
+
+
+/* Location detail service cards: prototype shows a per-service SVG in the tile; the query pattern prints a "◆" glyph.
+   Paint the same bp-icon masks per service post (45 daily-living .. 52 short-term-accommodation) and hide the glyph. */
+.single-location li.type-service .icon-tile { font-size: 0; color: var(--wp--preset--color--forest-700); }
+.single-location li.type-service .icon-tile::before {
+	content: ""; width: 24px; height: 24px; background-color: currentColor;
+	-webkit-mask: var(--bp-icon) center / contain no-repeat; mask: var(--bp-icon) center / contain no-repeat;
+}
+
+/* Privacy table: prototype .table-scroll { overflow-x:auto; radius md; 1px border } with table min-width 34rem. */
+.bp-measure .wp-block-table:has(> table) { overflow-x: auto; }
+body.bp-page-privacy .bp-measure .wp-block-table > table { min-width: 34rem; }
+/* prototype caption is .visually-hidden */
+body.bp-page-privacy .bp-measure .wp-block-table > figcaption { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+body.bp-page-privacy .bp-measure li { line-height: 1.7; }
+
+/* fix-d icons (2026-09-29): query-card tiles outside single-location still printed the "◆" glyph
+   (home services + locations, /services/ archive, /careers/ jobs). Paint the prototype icon per card.
+   WHICH icon is a per-post choice (post meta bp_icon, "Card icon" panel in the post editor): inc/icon-meta.php
+   adds .bp-icon--<name> to the tile on the front, assets/js/icon-meta-editor.js sets --bp-icon on it in the canvas.
+   No post-ID rules live here any more. */
+li.type-service .icon-tile,
+li.type-location .icon-tile,
+li.type-job .icon-tile { font-size: 0; }
+li.type-service .icon-tile::before,
+li.type-location .icon-tile::before,
+li.type-job .icon-tile::before {
+	content: ""; width: 20px; height: 20px; background-color: currentColor;
+	-webkit-mask: var(--bp-icon) center / contain no-repeat; mask: var(--bp-icon) center / contain no-repeat;
+}
+li.type-location .icon-tile { background-color: var(--wp--preset--color--sage-100); color: var(--wp--preset--color--sage-600); }
+li.type-job .icon-tile { background-color: var(--wp--preset--color--sage-100); color: var(--wp--preset--color--sage-600); }
+.single-location li.type-service .icon-tile::before { width: 24px; height: 24px; }
+/* Card icon "none" (meta bp_icon = none) or a tile with no icon resolved: no glyph, no solid square. */
+li .icon-tile.bp-icon-none::before,
+:is(li.type-service, li.type-location, li.type-job) .icon-tile:not([class*="bp-icon--"]):not([style*="--bp-icon"])::before { display: none; }

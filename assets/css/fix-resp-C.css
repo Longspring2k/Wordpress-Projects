@@ -1,0 +1,100 @@
+/* fix-resp-C.css — Agent C: site-wide responsive fixes (2026-09-29). Loads last. */
+
+/* C2. Headings: no orphan words (prototype uses .text-balance on headings) */
+h1, h2, h3 { text-wrap: balance; }
+
+/* C1a. 8-card grids: never 3+3+2. Scoped to home, /locations/ (page 176), services archive.
+   Query grids (bp-grid-4 post template): 4-up from 900 instead of 3-up. */
+@media (min-width: 900px) {
+	body.home .wp-block-post-template.bp-grid-4.bp-grid-4:has(> :nth-child(8):last-child) > .wp-block-post,
+	body.bp-page-locations .wp-block-post-template.bp-grid-4.bp-grid-4:has(> :nth-child(8):last-child) > .wp-block-post {
+		flex-basis: calc((100% - 72px) / 4) !important;
+	}
+}
+/* Services archive: core grid columns-3 with 8 cards -> 2-up 900-1199, 4-up >=1200 */
+@media (min-width: 900px) {
+	body.post-type-archive-service .wp-block-post-template.columns-3.bp-cards:has(> :nth-child(8):last-child) {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+@media (min-width: 1200px) {
+	body.post-type-archive-service .wp-block-post-template.columns-3.bp-cards:has(> :nth-child(8):last-child) {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+	}
+}
+
+/* C1b. 3-card grids on tablet (641-899): 3-up instead of 2+1.
+   home SIL homes (query), about team (query), service detail "Often used alongside". */
+@media (min-width: 641px) and (max-width: 899px) {
+	body.home .wp-block-post-template.bp-grid-3.bp-grid-3:has(> :nth-child(3):last-child) > .wp-block-post,
+	body.bp-page-about .wp-block-post-template.bp-grid-3.bp-grid-3:has(> :nth-child(3):last-child) > .wp-block-post {
+		flex-basis: calc((100% - 48px) / 3) !important;
+	}
+	body.single-service .wp-block-columns.bp-grid-3.bp-grid-3:has(> :nth-child(3):last-child) > .wp-block-column {
+		flex-basis: calc((100% - 48px) / 3) !important;
+	}
+	/* home testimonials: quotes are too long for 3 x 220px -> 1-up, readable measure */
+	body.home .wp-block-columns.bp-grid-3.bp-grid-3:has(> :nth-child(3):last-child):has(.wp-block-quote) > .wp-block-column {
+		flex-basis: 100% !important;
+	}
+}
+
+/* C3. Search pagination = prototype .pagination / .pagination__link (main.css:1465) */
+.bp-tpl--search .wp-block-query-pagination { justify-content: center; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 48px; }
+.bp-tpl--search .wp-block-query-pagination-numbers { display: flex; flex-wrap: wrap; gap: 8px; }
+.bp-tpl--search .wp-block-query-pagination .page-numbers,
+.bp-tpl--search .wp-block-query-pagination-previous,
+.bp-tpl--search .wp-block-query-pagination-next {
+	display: inline-flex; align-items: center; justify-content: center;
+	min-width: 44px; min-height: 44px; padding-inline: 12px; box-sizing: border-box;
+	font-size: var(--wp--preset--font-size--small); font-weight: 600; text-decoration: none;
+	color: var(--wp--preset--color--ink-900, inherit);
+	border: 1px solid var(--wp--custom--color--border, #dcd6cb); border-radius: var(--wp--custom--radius--md, 10px);
+	background-color: var(--wp--preset--color--white, #fff); margin: 0 !important;
+	transition: background-color .15s, border-color .15s, color .15s;
+}
+.bp-tpl--search .wp-block-query-pagination a:hover { border-color: var(--wp--preset--color--forest-700); color: var(--wp--preset--color--forest-700); background-color: var(--wp--preset--color--forest-100, #e6efe8); }
+.bp-tpl--search .wp-block-query-pagination .page-numbers.current { background-color: var(--wp--preset--color--forest-700); border-color: var(--wp--preset--color--forest-700); color: var(--wp--preset--color--sand-50); }
+.bp-tpl--search .wp-block-query-pagination .page-numbers.dots { border: 0; background: none; min-width: 32px; }
+
+/* C3b. Search input placeholder cut at 360 (input 209px vs ~280px text): stack input over a full-width button */
+@media (max-width: 480px) {
+	.bp-tpl--search .wp-block-search__inside-wrapper { flex-wrap: wrap; }
+	.bp-tpl--search .wp-block-search__input { flex: 1 1 100%; min-width: 0; }
+	.bp-tpl--search .wp-block-search__button { flex: 1 1 100%; }
+}
+
+/* C4a. Footer legal links at narrow widths: 5 links wrapped 4+1 ("Sitemap" alone, 68px row pitch).
+   3+2 grid, row spacing from the 44px targets themselves. */
+@media (max-width: 480px) {
+	.brightpath-footer .brightpath-footer__legal-links { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; column-gap: 24px; row-gap: 0; }
+	.brightpath-footer .brightpath-footer__legal-links a { justify-content: flex-start; }
+}
+/* C4b. Footer phone/email: link box is 50px tall (G10) but icon was pinned top (+3px) -> centre it */
+.brightpath-footer__contact-item:has(> a:only-child) { align-items: center; }
+.brightpath-footer__contact-item:has(> a:only-child)::before { margin-top: 0; }
+
+/* C5. Desktop submenu toggle: 16x16 -> 24x24 hit area, icon stays put
+   (old box 4+16+12 = 32px incl. margins; new 0+24+8 = 32px, svg centred at same x) */
+.brightpath-header__inner .wp-block-navigation-submenu > .wp-block-navigation-submenu__toggle {
+	width: 24px !important; height: 24px !important; margin: 0 8px 0 0 !important;
+	display: inline-flex; align-items: center; justify-content: center;
+}
+
+/* C7. Services archive CTA: "Download service guide" wrapped to 2 lines at 360 */
+@media (max-width: 480px) {
+	body.post-type-archive-service .wp-block-button.bp-btn--lg > .wp-block-button__link { white-space: nowrap; padding-inline: 20px; }
+}
+
+/* Agent F 2026-09-29 */
+/* Home hero trust list (3 items): wrapped 2+1 whenever the hero column is
+   narrower than the one-row width (~660px, e.g. 1024 viewport). Stack to a
+   single balanced column in that case; stays one row where it fits. */
+body.home .bp-hero-home .tick-list.bp-free { width: 100%; }
+body.home .bp-hero-home .bp-reveal:has(> .tick-list.bp-free) { container-type: inline-size; }
+@container (max-width: 680px) {
+	body.home .bp-hero-home .tick-list.bp-free { flex-direction: column; flex-wrap: nowrap; row-gap: 12px; }
+}
+/* Referral stepper: labels wrap to 2 lines at 1440 exactly as the prototype
+   does (form panel ~635px); only balance the wrap so no orphan word. */
+body.bp-page-refer-a-participant .stepper__dot-label { text-wrap: balance; }

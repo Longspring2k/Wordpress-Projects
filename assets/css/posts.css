@@ -1,0 +1,303 @@
+/* ==========================================================================
+   Bright Path — posts layer
+
+   OWNER: the post-type track. Detail-page components that no core block
+   support and no theme.json preset already expresses: the spec label/value
+   grid, the vacancy status dot, and the location hero stat row. Nothing else
+   belongs here — a selector with no consumer in a single- or archive- template
+   or in seeded post_content is a rule nobody asked for.
+
+   One shard of what used to be a single style.css. The split exists so that
+   parallel work cannot collide: `.design-core/` is not under version control,
+   so two agents editing one file means one of them is lost, not merged.
+   Do not move rules between shards without saying so.
+
+   Prints after `bands` and before `forms`; see brightpath_style_shards().
+
+   ZERO literal hex. Every colour, radius, space and duration resolves through
+   a theme.json preset or a settings.custom alias. A hex here is a token that
+   Main never agreed to, hidden where no palette check will find it.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Spec grid — the label/value pairs on a SIL home and a service.
+
+   Authored as a plain core/list with .bp-spec-list and one "Label — value"
+   per item, so an editor adds a spec by pressing Enter. The two-column shape
+   is CSS; there is no block here to get wrong.
+   -------------------------------------------------------------------------- */
+
+.bp-spec-list {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: var(--wp--preset--spacing--30);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+@media (min-width: 641px) {
+	.bp-spec-list {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--wp--preset--spacing--30) var(--wp--preset--spacing--50);
+	}
+}
+
+.bp-spec-list > li {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--wp--preset--spacing--20);
+	padding-block: var(--wp--preset--spacing--30);
+	border-bottom: 1px solid var(--wp--custom--color--border);
+	color: var(--wp--custom--color--text-body);
+}
+
+/* The label is the strong run at the start of the item. Bolding is how an
+   editor already writes a label, so no extra class is required of them. */
+.bp-spec-list > li > strong {
+	color: var(--wp--custom--color--text-muted);
+	font-size: var(--wp--preset--font-size--x-small);
+	font-weight: 600;
+	letter-spacing: 0.09em;
+	text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   2. Status dot — core/post-terms for sil_status and job_status.
+
+   The dot is a pseudo-element on the term link, NOT an image and not an icon
+   block: post-terms renders <a> children we do not control, and ::before is
+   the only hook that survives a term being added or renamed.
+
+   The four state colours key off get_post_class()'s {taxonomy}-{term-slug}
+   class on the enclosing post item -- the same hook the archive filter uses
+   (contract 16), so there is exactly one status vocabulary on the site rather
+   than two that can drift apart.
+
+   On a SINGLE template there is no post item wrapper, so the dot falls back
+   to the neutral colour. That is correct and not a gap: the single page
+   states the status in words, and a colour-only signal would be the whole
+   message for a reader who cannot distinguish it.
+   -------------------------------------------------------------------------- */
+
+.bp-status {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--wp--preset--spacing--20);
+	padding: var(--wp--preset--spacing--10) var(--wp--preset--spacing--30);
+	border: 1px solid var(--wp--custom--color--border);
+	border-radius: var(--wp--custom--radius--full);
+	background-color: var(--wp--custom--color--surface);
+	color: var(--wp--custom--color--text-body);
+	font-weight: 600;
+	letter-spacing: 0.09em;
+	text-transform: uppercase;
+	line-height: 1.4;
+}
+
+.bp-status::before {
+	content: "";
+	flex: 0 0 auto;
+	inline-size: 0.5em;
+	block-size: 0.5em;
+	border-radius: var(--wp--custom--radius--full);
+	background-color: var(--wp--custom--color--text-subtle);
+}
+
+.sil_status-available .bp-status::before,
+.job_status-open .bp-status::before {
+	background-color: var(--wp--custom--color--success);
+}
+
+.sil_status-limited .bp-status::before,
+.job_status-closing-soon .bp-status::before {
+	background-color: var(--wp--custom--status--warning);
+}
+
+.sil_status-full .bp-status::before,
+.job_status-closed .bp-status::before {
+	background-color: var(--wp--custom--status--error);
+}
+
+/* A term link inside the badge must not repeat the body link underline. */
+.bp-status a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.bp-status a:hover,
+.bp-status a:focus-visible {
+	text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   3. Location hero stat row — three stats, authored in post_content as a
+   core/list with .bp-stats, one "value — label" per item.
+
+   Three across from 641px and not before: at 390 three stats of 2.25rem sit
+   at roughly 110px each inside a 350px measure and the labels wrap to four
+   lines each.
+   -------------------------------------------------------------------------- */
+
+.bp-stats {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: var(--wp--preset--spacing--50);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+@media (min-width: 641px) {
+	.bp-stats {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+.bp-stats > li {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wp--preset--spacing--10);
+	padding-inline-start: var(--wp--preset--spacing--40);
+	border-inline-start: 2px solid var(--wp--custom--color--border-hover);
+	color: var(--wp--custom--color--text-muted);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.bp-stats > li > strong {
+	display: block;
+	color: var(--wp--custom--color--primary);
+	font-family: var(--wp--preset--font-family--fraunces);
+	font-size: var(--wp--preset--font-size--stat);
+	font-weight: 600;
+	line-height: 1.06;
+	letter-spacing: -0.02em;
+}
+
+
+/* --------------------------------------------------------------------------
+   4  Query bands — the grid ladder for a post-template
+   --------------------------------------------------------------------------
+   The static grids are core/columns: `.wp-block-columns.bp-grid-3 > .wp-block-column`.
+   A core/post-template is a <ul> of <li class="wp-block-post">, so NOT ONE of
+   the bands.css grid rules matches it — every selector there is qualified by
+   `.wp-block-columns` or by `> .wp-block-column`. bands.css is therefore left
+   completely alone, and the ladder is restated here, once, against the
+   post-template's own child.
+
+   The numbers are the same numbers, and they are the same because the gap is
+   the same: the query bands set blockGap spacing|50 (24px) on the
+   post-template exactly as the columns grids set it on the columns block, and
+   core's flex layout emits it as `gap`. If the contract's rungs move, both
+   this block and bands.css section A3 move together — they are two renderings
+   of one decision, contract section 3:
+     <=640   one column, every grid
+     641-899 two columns
+     >=900   bp-grid-3 three; bp-grid-4 still three
+     >=1200  bp-grid-4 four
+
+   `!important` is here for the same reason it is in bands.css A3: core ships
+   a flex-basis !important for post templates and columns alike, and two
+   !important declarations are decided by specificity, not source order. The
+   class is repeated to reach (0,4,0). */
+
+.wp-block-post-template.bp-query-grid.bp-query-grid {
+	align-items: stretch;
+}
+
+.wp-block-post-template.bp-query-grid.bp-query-grid > .wp-block-post {
+	flex-grow: 0;
+	flex-basis: 100%;
+	/* The card is the grid item's only child and must fill it, or a short
+	   card in a tall row leaves the panel floating. */
+	display: flex;
+	flex-direction: column;
+}
+
+.wp-block-post-template.bp-query-grid.bp-query-grid > .wp-block-post > .wp-block-group {
+	flex: 1 1 auto;
+}
+
+@media (min-width: 641px) {
+	.wp-block-post-template.bp-grid-3.bp-grid-3 > .wp-block-post,
+	.wp-block-post-template.bp-grid-4.bp-grid-4 > .wp-block-post {
+		flex-basis: calc((100% - 24px) / 2) !important;
+	}
+}
+
+@media (min-width: 900px) {
+	.wp-block-post-template.bp-grid-3.bp-grid-3 > .wp-block-post,
+	.wp-block-post-template.bp-grid-4.bp-grid-4 > .wp-block-post {
+		flex-basis: calc((100% - 48px) / 3) !important;
+	}
+}
+
+@media (min-width: 1200px) {
+	.wp-block-post-template.bp-grid-4.bp-grid-4 > .wp-block-post {
+		flex-basis: calc((100% - 72px) / 4) !important;
+	}
+}
+
+/* 4.1  The featured image inside the media box.
+
+   Same trap as the static placeholder, one block further along: an empty
+   core/post-featured-image renders ZERO ELEMENTS, not an empty figure, so a
+   member with no portrait would leave nothing to measure. The box is the
+   .bp-media GROUP from bands.css, which always renders and carries the ratio;
+   these two rules only teach the featured-image figure to fill it, exactly as
+   bands.css teaches `.bp-media > .wp-block-image` to. */
+.bp-media > .wp-block-post-featured-image {
+	margin: 0;
+	height: 100%;
+}
+
+.bp-media > .wp-block-post-featured-image img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* 4.2  Core's own block styles put margins on these three; inside a card the
+   rhythm is the group's blockGap and nothing else. */
+.bp-panel .wp-block-post-title,
+.bp-panel .wp-block-post-excerpt,
+.bp-panel .wp-block-post-terms {
+	margin: 0;
+}
+
+.bp-panel .wp-block-post-excerpt__excerpt {
+	margin: 0;
+}
+
+/* A card title is a link to the record; it must not carry the body underline. */
+.bp-panel .wp-block-post-title a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.bp-panel .wp-block-post-title a:hover,
+.bp-panel .wp-block-post-title a:focus-visible {
+	text-decoration: underline;
+}
+
+/* The region and accessibility lines are term lists, not prose. */
+.bp-panel .wp-block-post-terms a {
+	color: inherit;
+	text-decoration: none;
+}
+
+/* 4.3  A member with no role must render NO line, not an empty one.
+
+   The role is a binding, and a binding that resolves to '' still renders its
+   paragraph: `<p class="card__role"></p>`. That is an empty line in the card's
+   blockGap rhythm, and it looks exactly like a defect rather than like a
+   record awaiting a role. `:empty` collapses it. The same reasoning as the
+   media box, in the opposite direction: a placeholder box must be visible
+   because it is waiting for content; an absent field must be invisible
+   because there is nothing to wait for. */
+.card__role:empty {
+	display: none;
+}

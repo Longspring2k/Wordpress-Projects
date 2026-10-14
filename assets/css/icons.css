@@ -1,0 +1,52 @@
+/* Icon picker UI (editor window + Appearance → Icons). Never loaded on the front. */
+.bp-icon-swatch {
+	display: inline-block;
+	width: 24px;
+	height: 24px;
+	background-color: currentColor;
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	mask-position: center;
+	-webkit-mask-size: contain;
+	mask-size: contain;
+}
+
+.bp-icon-picker { display: block; }
+.bp-icon-picker__current { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-size: 12px; color: #50575e; }
+.bp-icon-picker__current .bp-icon-swatch { width: 28px; height: 28px; color: #1e1e1e; }
+.bp-icon-picker__search { margin-bottom: 8px; }
+.bp-icon-picker__grid {
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 4px;
+	max-height: 260px;
+	overflow-y: auto;
+	padding: 2px;
+}
+.bp-icon-picker__cell {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	aspect-ratio: 1 / 1;
+	padding: 0;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	background: #fff;
+	color: #1e1e1e;
+	cursor: pointer;
+}
+.bp-icon-picker__cell:hover { border-color: #007cba; color: #007cba; }
+.bp-icon-picker__cell:focus-visible { outline: 2px solid #007cba; outline-offset: 1px; }
+.bp-icon-picker__cell.is-selected { border-color: #007cba; box-shadow: 0 0 0 1px #007cba; background: #f0f6fc; color: #007cba; }
+.bp-icon-picker__cell--none { font-size: 11px; line-height: 1.1; text-align: center; }
+.bp-icon-picker__group { grid-column: 1 / -1; margin: 6px 0 0; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #757575; }
+.bp-icon-picker__pos { margin-top: 12px; }
+.bp-icon-picker__hint { margin: 10px 0 0; font-size: 12px; color: #757575; }
+.bp-icon-picker__popover { width: 280px; padding: 12px; }
+
+/* Admin screen */
+.bp-icons-admin__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin: 12px 0 24px; }
+.bp-icons-admin__cell { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; padding: 12px; background: #fff; border: 1px solid #dcdcde; border-radius: 4px; }
+.bp-icons-admin__cell .bp-icon-swatch { width: 32px; height: 32px; color: #1e1e1e; }
+.bp-icons-admin__cell code { font-size: 11px; word-break: break-all; }

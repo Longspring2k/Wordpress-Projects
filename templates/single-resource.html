@@ -1,0 +1,114 @@
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+
+<!-- wp:group {"tagName":"main","align":"full","className":"bp-tpl bp-tpl\u002d\u002dsingle-resource","style":{"spacing":{"blockGap":"0"}},"layout":{"type":"constrained"}} -->
+<main class="wp-block-group alignfull bp-tpl bp-tpl--single-resource"><!-- wp:group {"align":"full","className":"bp-article-hero","style":{"spacing":{"padding":{"top":"var:preset|spacing|section-y","bottom":"var:preset|spacing|section-y"},"blockGap":"var:preset|spacing|50"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignfull bp-article-hero" style="padding-top:var(--wp--preset--spacing--section-y);padding-bottom:var(--wp--preset--spacing--section-y)"><!-- wp:breadcrumbs /-->
+
+<!-- wp:group {"className":"bp-reveal","style":{"spacing":{"blockGap":"var:preset|spacing|40"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group bp-reveal"><!-- wp:post-terms {"term":"resource_category","className":"bp-eyebrow","fontSize":"x-small"} /-->
+
+<!-- wp:post-title {"level":1,"fontSize":"heading-1"} /-->
+
+<!-- wp:post-excerpt {"excerptLength":60,"showMoreOnNewLine":false,"fontSize":"large"} /-->
+
+<!-- wp:group {"className":"bp-byline","style":{"spacing":{"blockGap":"var:preset|spacing|30"}},"layout":{"type":"flex","flexWrap":"wrap","verticalAlignment":"center"}} -->
+<div class="wp-block-group bp-byline"><!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"brightpath/derived","args":{"key":"author_initials"}}}},"className":"bp-byline__initials","fontSize":"x-small"} -->
+<p class="bp-byline__initials has-x-small-font-size"></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"brightpath/derived","args":{"key":"author_name"}}}},"className":"bp-byline__name","fontSize":"small"} -->
+<p class="bp-byline__name has-small-font-size"></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"brightpath/derived","args":{"key":"author_role"}}}},"className":"bp-byline__role","textColor":"ink-600","fontSize":"x-small"} -->
+<p class="bp-byline__role has-ink-600-color has-text-color has-x-small-font-size"></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:post-date {"format":"j F Y","isLink":false,"textColor":"ink-600","fontSize":"x-small"} /-->
+
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"brightpath/derived","args":{"key":"read_time"}}}},"className":"bp-byline__readtime","textColor":"ink-600","fontSize":"x-small"} -->
+<p class="bp-byline__readtime has-ink-600-color has-text-color has-x-small-font-size"></p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"bp-measure","layout":{"type":"constrained"}} -->
+<div class="wp-block-group bp-measure">
+<!-- wp:group {"className":"bp-media bp-media\u002d\u002dratio-16-9 bp-reveal bp-reveal\u002d\u002dd1"} -->
+<div class="wp-block-group bp-media bp-media--ratio-16-9 bp-reveal bp-reveal--d1">
+<!-- wp:paragraph {"className":"bp-media__label","metadata":{"bindings":{"content":{"source":"brightpath/derived","args":{"key":"media_label"}}}}} -->
+<p class="bp-media__label">Photograph — brief to be set</p>
+<!-- /wp:paragraph -->
+<!-- wp:post-featured-image {"style":{"border":{"radius":"var(\u002d\u002dwp\u002d\u002dcustom\u002d\u002dradius\u002d\u002dlg)"}}} /-->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"align":"full","className":"bp-article-body","style":{"spacing":{"padding":{"top":"0","bottom":"var:preset|spacing|section-y"},"blockGap":"0"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignfull bp-article-body" style="padding-top:0;padding-bottom:var(--wp--preset--spacing--section-y)"><!-- wp:post-content {"align":"wide","className":"article-layout bp-prose","layout":{"type":"default"}} /--></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"align": "full", "backgroundColor": "sand-100", "className": "bp-related", "style": {"spacing": {"padding": {"top": "var:preset|spacing|section-y", "bottom": "var:preset|spacing|section-y"}, "blockGap": "var:preset|spacing|60"}}, "layout": {"type": "constrained"}} -->
+<div class="wp-block-group alignfull bp-related has-sand-100-background-color has-background" style="padding-top:var(--wp--preset--spacing--section-y);padding-bottom:var(--wp--preset--spacing--section-y)"><!-- wp:group {"className": "bp-reveal bp-head-split", "layout": {"type": "flex", "flexWrap": "wrap", "justifyContent": "space-between", "verticalAlignment": "bottom"}} -->
+<div class="wp-block-group bp-reveal bp-head-split"><!-- wp:group {"style": {"spacing": {"blockGap": "var:preset|spacing|40"}}, "layout": {"type": "constrained"}} -->
+<div class="wp-block-group"><!-- wp:paragraph {"className": "bp-eyebrow", "fontSize": "x-small"} -->
+<p class="bp-eyebrow has-x-small-font-size">Keep reading</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Related articles</h2>
+<!-- /wp:heading -->
+
+</div>
+<!-- /wp:group -->
+
+<!-- wp:paragraph -->
+<p><a class="link-arrow" href="/resources/">All resources</a></p>
+<!-- /wp:paragraph -->
+
+</div>
+<!-- /wp:group -->
+
+<!-- wp:query {"queryId": 7, "query": {"perPage": 3, "pages": 0, "offset": 0, "postType": "resource", "order": "desc", "orderBy": "date", "inherit": false, "bpRole": "related"}, "layout": {"type": "default"}} -->
+<div class="wp-block-query"><!-- wp:post-template {"className": "bp-cards bp-grid-3", "style": {"spacing": {"blockGap": {"top": "var:preset|spacing|50", "left": "var:preset|spacing|50"}}}, "layout": {"type": "grid", "columnCount": 3}} -->
+<!-- wp:group {"backgroundColor": "white", "className": "bp-panel bp-reveal card\u002d\u002darticle", "style": {"spacing": {"blockGap": "var:preset|spacing|30"}}} -->
+<div class="wp-block-group bp-panel bp-reveal card--article has-white-background-color has-background"><!-- wp:group {"className":"bp-media bp-media\u002d\u002dratio-16-9 bp-media\u002d\u002dsquare-top","layout":{"type":"default"}} -->
+<div class="wp-block-group bp-media bp-media--ratio-16-9 bp-media--square-top"><!-- wp:paragraph {"metadata": {"bindings": {"content": {"source": "brightpath/derived", "args": {"key": "media_label"}}}}, "className": "bp-media__label", "fontSize": "small"} -->
+<p class="bp-media__label has-small-font-size"></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:post-featured-image /--></div>
+<!-- /wp:group -->
+
+<!-- wp:post-terms {"term":"resource_category","className":"card__category bp-eyebrow","fontSize":"x-small"} /-->
+
+<!-- wp:post-title {"level":3,"isLink":true,"className":"card__title","fontSize":"heading-3"} /-->
+
+<!-- wp:post-excerpt {"excerptLength":24,"className":"card__text","showMoreOnNewLine":false,"fontSize":"small"} /-->
+
+<!-- wp:paragraph {"metadata": {"bindings": {"content": {"source": "brightpath/derived", "args": {"key": "read_time"}}}}, "className": "card__meta", "fontSize": "x-small"} -->
+<p class="card__meta has-x-small-font-size"></p>
+<!-- /wp:paragraph -->
+
+</div>
+<!-- /wp:group -->
+
+<!-- /wp:post-template -->
+
+<!-- wp:query-no-results -->
+<!-- wp:paragraph -->
+<p>More guides are on the way. <a href="/resources/">Browse all resources</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- /wp:query-no-results --></div>
+<!-- /wp:query -->
+
+</div>
+<!-- /wp:group -->
+
+<!-- wp:pattern {"slug":"brightpath/cta-dark-source"} /--></main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->
