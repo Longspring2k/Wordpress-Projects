@@ -1,60 +1,60 @@
 # Bright Path — brightpath-gutenburg
 
-Block theme (Gutenberg Full-Site Editing) cho website **Bright Path** — dịch vụ NDIS.
+Gutenberg Full-Site Editing (FSE) block theme for the **Bright Path** NDIS services website.
 
-- **Demo đang chạy:** https://brightpath-gutenburg.buildkitly.com
+- **Live demo:** https://brightpath-gutenburg.buildkitly.com
 - **Site Name (DB):** `Bright Path` / Tagline: `Supports`
 - **Theme Name:** `Bright Path` / Text Domain: `brightpath` / Version: `1.0.0`
-- **Nguồn:** export từ VPS `167.86.115.187`, dir `/srv/sites/brightpath-gutenburg/html/wp-content/themes/brightpath` (branch này = nguyên trạng working-tree, đã loại `.git` và file `*.bak*`).
+- **Source:** exported from VPS `167.86.115.187`, dir `/srv/sites/brightpath-gutenburg/html/wp-content/themes/brightpath` (this branch mirrors the working tree, excluding `.git` and `*.bak*` files).
 
-## Tính năng
+## Features
 
-- FSE đầy đủ: `templates/`, `parts/`, `patterns/`, `styles/`, `theme.json`
-- Custom block `brightpath/form` (`blocks/form/`) + logic form/mail/CPT nằm trong theme (`inc/mail.php`, `inc/post-types.php`, `inc/forms.php`, `inc/form-block.php`)
-- Icon library 36 icons + REST `/brightpath/v1/icons`, block Icon picker (`inc/icons.php`, `inc/icon-meta.php`)
-- Mobile nav overlay, band-rhythm (nửa padding giữa 2 band cùng nền), `bp-page-<slug>` body class, starter-content tự import khi active
-- CSS chia shard theo owner (`assets/css/`: foundation, bands, posts, forms...), enqueue có thứ tự sau `global-styles` (`inc/assets.php`)
+- Full FSE: `templates/`, `parts/`, `patterns/`, `styles/`, `theme.json`
+- Custom `brightpath/form` block (`blocks/form/`) with form/mail/CPT logic bundled in the theme (`inc/mail.php`, `inc/post-types.php`, `inc/forms.php`, `inc/form-block.php`)
+- Icon library (36 icons) + REST endpoint `/brightpath/v1/icons` and block Icon picker (`inc/icons.php`, `inc/icon-meta.php`)
+- Mobile nav overlay, band-rhythm (half padding between adjacent same-background bands), `bp-page-<slug>` body class, starter content auto-imported on activation
+- Owner-sharded CSS (`assets/css/`: foundation, bands, posts, forms, ...) enqueued in order after `global-styles` (`inc/assets.php`)
 
-## Yêu cầu
+## Requirements
 
 - WordPress >= 6.7 (tested up to 7.1)
 - PHP >= 7.4
-- Plugin gợi ý (không bắt buộc): `advanced-custom-fields`, `wordpress-seo`
-- Lưu ý: plugin `brightpath-core` cũ đã được **fold-back vào theme**. Theme có guard `BRIGHTPATH_CORE_VERSION` nên cứ để plugin tắt để tránh redeclare. Không cần cài thêm gì để chạy.
+- Suggested (optional) plugins: `advanced-custom-fields`, `wordpress-seo`
+- Note: the legacy `brightpath-core` plugin has been **folded back into the theme**. The theme ships a `BRIGHTPATH_CORE_VERSION` guard, so keep that plugin deactivated to avoid redeclaration. Nothing else is required to run.
 
-## Cài đặt
+## Installation
 
-### Cách 1 — clone branch này (khuyên dùng)
+### Option 1 — clone this branch (recommended)
 
 ```bash
 git clone -b brightpath-gutenburg https://github.com/Longspring2k/Wordpress-Projects.git brightpath
 cp -r brightpath /path/to/wordpress/wp-content/themes/brightpath
 ```
 
-Vào WP Admin → Appearance → Themes → Active **Bright Path**.
+Then go to WP Admin → Appearance → Themes → Activate **Bright Path**.
 
-### Cách 2 — tải ZIP từ GitHub
+### Option 2 — download ZIP from GitHub
 
-Mở branch `brightpath-gutenburg` → Code → Download ZIP → giải nén thành thư mục `brightpath` → upload vào `wp-content/themes/` → Active.
+Open the `brightpath-gutenburg` branch → Code → Download ZIP → extract as folder `brightpath` → upload to `wp-content/themes/` → Activate.
 
-### Cách 3 — copy từ VPS (nội bộ)
+### Option 3 — copy from VPS (internal)
 
 ```bash
 scp -r root@167.86.115.187:/srv/sites/brightpath-gutenburg/html/wp-content/themes/brightpath ./brightpath
 ```
 
-Sau khi Active, starter-content tự import. Kiểm tra:
+After activation, starter content is imported automatically. Verify:
 
-- Front-end load bình thường, không fatal
-- `Appearance → Editor` mở được templates/patterns
-- Form block (`brightpath/form`) render + gửi mail được (cấu hình SMTP của site)
+- Front end loads with no fatal errors
+- `Appearance → Editor` opens templates/patterns correctly
+- The form block (`brightpath/form`) renders and sends mail (uses the site SMTP configuration)
 
-## Cấu trúc
+## Structure
 
 ```
-style.css          Theme header (không chứa CSS, CSS nằm ở shards)
+style.css          Theme header only (CSS lives in shards)
 theme.json         Global styles/settings
-functions.php      Loader — chỉ require các shard trong inc/, không viết logic ở đây
+functions.php      Loader — only requires shards from inc/, no logic here
 inc/               setup, assets, patterns, editor-locks, nav-state, design-parity,
                    icons, icon-meta, mobile-nav, band-rhythm, page-classes,
                    starter-content, mail, post-types, forms, form-block
@@ -63,8 +63,8 @@ assets/css|js/     CSS shards + JS (editor-canvas, mobile-nav, band-rhythm...)
 parts|templates|patterns|styles|starter|tools
 ```
 
-Muốn thêm tính năng: thêm 1 shard mới trong `inc/` rồi khai báo vào mảng trong `functions.php`. Shard chưa tồn tại sẽ được bỏ qua nên không sập site.
+To add a feature: add a new shard file under `inc/` and register it in the array inside `functions.php`. A listed shard that does not exist yet is skipped, so the site never goes down.
 
 ## License
 
-GPL-2.0-or-later (kế thừa từ WordPress).
+GPL-2.0-or-later (inherited from WordPress).
