@@ -2,7 +2,6 @@
 
 Gutenberg Full-Site Editing (FSE) block theme for the **Bright Path** NDIS services website.
 
-- **Live demo:** https://brightpath-gutenburg.buildkitly.com
 - **Site Name (DB):** `Bright Path` / Tagline: `Supports`
 - **Theme Name:** `Bright Path` / Text Domain: `brightpath` / Version: `1.0.0`
 - **Source:** exported from VPS `167.86.115.187`, dir `/srv/sites/brightpath-gutenburg/html/wp-content/themes/brightpath` (this branch mirrors the working tree, excluding `.git` and `*.bak*` files).
